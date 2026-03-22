@@ -16,9 +16,7 @@ class AcceptButton(discord.ui.Button['TicTacToeAcceptView']):
         user_id = interaction.user.id
 
         if user_id != view.player:
-            view.players.append(user_id)
             self.disabled = True
-            view.accept_to_choose_turn()
             view.stop()
             await interaction.response.edit_message(content="Choose Symbol You Want To Play", view=TicTacToeChooseSymbolView(view.player, user_id))
         else:
