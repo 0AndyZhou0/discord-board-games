@@ -15,11 +15,6 @@ class AcceptButton(discord.ui.Button['TicTacToeAcceptView']):
 
         user_id = interaction.user.id
 
-
-        # TODO(Ertyus Suytre): REMOVE THIS WHEN DONE  # noqa: TD003
-        view.stop()
-        await interaction.response.edit_message(content="Choose Symbol You Want To Play", view=TicTacToeChooseSymbolView(view.player, user_id))
-
         if user_id != view.player:
             view.players.append(user_id)
             self.disabled = True
@@ -28,6 +23,7 @@ class AcceptButton(discord.ui.Button['TicTacToeAcceptView']):
             await interaction.response.edit_message(content="Choose Symbol You Want To Play", view=TicTacToeChooseSymbolView(view.player, user_id))
         else:
             await interaction.response.send_message(content="You are already in the game", ephemeral=True)
+            return
 
 class TicTacToeAcceptView(discord.ui.View):
     def __init__(self, player_id: int) -> None:
