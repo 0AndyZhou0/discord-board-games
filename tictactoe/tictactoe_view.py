@@ -14,11 +14,13 @@ class TicTacToeButton(discord.ui.Button['TicTacToeView']):
         assert self.view is not None
         view: TicTacToeView = self.view
 
-        if interaction.user.id not in (view.player_X, view.player_O):
+        user_id = interaction.user.id
+
+        if user_id not in (view.player_X, view.player_O):
             await interaction.response.send_message(content="You are not in the game", ephemeral=True)
             return
 
-        if interaction.user.id != view.get_current_player_id():
+        if user_id != view.get_current_player_id():
             await interaction.response.send_message(content="It is not your turn", ephemeral=True)
             return
 
@@ -41,19 +43,11 @@ class TicTacToeButton(discord.ui.Button['TicTacToeView']):
             view.current_player = Symbol.X
             content = f"It is now <@{view.get_current_player_id()}>'s turn"
 
-        # Bot Move
-        if -1 in (view.player_O, view.player_X):
-            view.random_move()
-
         winner = view.winner
         if winner is not None:
-            if winner == Symbol.X:
-                content = f'<@{view.player_X}> won!'
-            elif winner == Symbol.O:
-                content = f'<@{view.player_O}> won!'
-            else:
-                content = f"<@{view.player_X}> and <@{view.player_O}> tied!"
+            content = view.get_winner_message()
 
+            view.stop_game()
             view.stop()
 
         await interaction.response.edit_message(content=content, view=view)
@@ -92,6 +86,10 @@ class TicTacToeView(discord.ui.View):
         self.board[y][x] = symbol
         self.winner = self.check_for_win()
 
+    def stop_game(self) -> None:
+        for button in self.children:
+            button.disabled = True
+
     def check_for_win(self) -> Symbol | None:
         for row in self.board:
             if row[0] == row[1] == row[2] != Symbol.EMPTY:
@@ -112,7 +110,18 @@ class TicTacToeView(discord.ui.View):
                 return None
 
         return Symbol.TIE
-        
+    
+    def get_winner_id(self) -> int:
+        if self.winner == Symbol.X:
+            return self.player_X
+        if self.winner == Symbol.O:
+            return self.player_O
+        return None
+    
+    def get_winner_message(self) -> str:
+        if self.winner == Symbol.TIE:
+            return f"<@{self.player_X}> and <@{self.player_O}> tied!"
+        return f"<@{self.get_winner_id()}> won!"
 
     def random_move(self) -> tuple[int, int] | None:
         empty_squares = []

@@ -1,12 +1,17 @@
+import logging
 from enum import IntEnum
 from random import choice
 
 import discord
 
+from .tictactoe_bot import TicTacToeBot
+
+logger = logging.getLogger("cogs.tictactoe")
+logger.setLevel(logging.INFO)
 
 class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
     def __init__(self, x: int, y: int) -> None:
-        super().__init__(style=discord.ButtonStyle.secondary, label="\u200b", row=y)
+        super().__init__(style=discord.ButtonStyle.secondary, label="\u200b", row=x)
         self.x = x
         self.y = y
 
@@ -14,11 +19,13 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
         assert self.view is not None
         view: TicTacToeBotView = self.view
 
-        if interaction.user.id != view.player:
+        user_id = interaction.user.id
+
+        if user_id != view.player:
             await interaction.response.send_message(content="You are not in the game", ephemeral=True)
             return
 
-        state = view.board[self.y][self.x]
+        state = view.board[self.x][self.y]
         if state in (Symbol.X, Symbol.O):
             return
 
@@ -35,12 +42,10 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
 
         winner = view.winner
         if winner is not None:
-            if winner == view.player_symbol:
-                content = f'<@{view.player}> won!'
-            elif winner == view.bot_symbol:
-                content = 'The bot won!'
+            if winner == Symbol.TIE:
+                content = f"<@{user_id}> and the bot tied!"
             else:
-                content = f"<@{view.player}> and the bot tied!"
+                content = f'<@{user_id}> won!'
 
             view.stop_game()
             view.stop()
@@ -49,17 +54,15 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
             return
 
         # Bot Move
-        view.random_move()
-        content = f"It is now <@{view.player}>'s turn"
+        view.bot_move()
+        content = f"It is now <@{user_id}>'s turn"
 
         winner = view.winner
         if winner is not None:
-            if winner == view.player_symbol:
-                content = f'<@{view.player}> won!'
-            elif winner == view.bot_symbol:
-                content = 'The bot won!'
+            if winner == Symbol.TIE:
+                content = f"<@{user_id}> and the bot tied!"
             else:
-                content = f"<@{view.player}> and the bot tied!"
+                content = 'The bot won!'
 
             view.stop_game()
             view.stop()
@@ -78,12 +81,13 @@ class Symbol(IntEnum):
     RANDOM = 3
 
 class TicTacToeBotView(discord.ui.View):
-    def __init__(self, player_X_id: int, player_O_id: int) -> None:
+    def __init__(self, player_X_id: int, player_O_id: int, random: bool = False) -> None:
         super().__init__()
 
         self.player = player_X_id if player_X_id != -1 else player_O_id
         self.player_symbol = Symbol.X if player_X_id != -1 else Symbol.O
         self.bot_symbol = Symbol.X if player_X_id == -1 else Symbol.O
+        self.random = random
         self.winner = None
 
         self.board = [[Symbol.EMPTY] * 3 for _ in range(3)]
@@ -94,14 +98,14 @@ class TicTacToeBotView(discord.ui.View):
 
         # Bot First Move
         if self.bot_symbol == Symbol.X:
-            self.random_move()
+            self.bot_move()
     
     def stop_game(self) -> None:
         for button in self.children:
             button.disabled = True
     
     def place_symbol(self, x: int, y: int, symbol: Symbol) -> None:
-        self.board[y][x] = symbol
+        self.board[x][y] = symbol
         self.winner = self.check_for_win()
 
     def check_for_win(self) -> Symbol | None:
@@ -125,28 +129,40 @@ class TicTacToeBotView(discord.ui.View):
 
         return Symbol.TIE
         
+    def bot_move(self) -> None:
+        if self.random:
+            self.random_move()
+        else:
+            self.good_move()
 
     def random_move(self) -> tuple[int, int] | None:
         empty_squares = []
         for x in range(3):
             for y in range(3):
-                if self.board[y][x] == Symbol.EMPTY:
+                if self.board[x][y] == Symbol.EMPTY:
                     empty_squares.append((x, y))
 
         if empty_squares:
             x, y = choice(empty_squares)
-            self.place_symbol(x, y, self.bot_symbol)
-            for button in self.children:
-                if button.x == x and button.y == y:
-                    if self.bot_symbol == Symbol.X:
-                        button.style = discord.ButtonStyle.danger
-                        button.label = 'X'
-                        button.disabled = True
-                    elif self.bot_symbol == Symbol.O:
-                        button.style = discord.ButtonStyle.success
-                        button.label = 'O'
-                        button.disabled = True
-
+            self.place_bot_symbol(x, y)
             return (x, y)
 
         return None
+    
+    def good_move(self) -> tuple[int, int] | None:
+        x, y = TicTacToeBot.find_best_move(self.board, self.bot_symbol)
+        self.place_bot_symbol(x, y)
+        return (x, y)
+    
+    def place_bot_symbol(self, x: int, y: int) -> None:
+        self.place_symbol(x, y, self.bot_symbol)
+        for button in self.children:
+            if button.x == x and button.y == y:
+                if self.bot_symbol == Symbol.X:
+                    button.style = discord.ButtonStyle.danger
+                    button.label = 'X'
+                    button.disabled = True
+                elif self.bot_symbol == Symbol.O:
+                    button.style = discord.ButtonStyle.success
+                    button.label = 'O'
+                    button.disabled = True

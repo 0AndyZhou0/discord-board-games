@@ -32,16 +32,17 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeBotChooseSymbolView']):
 
         if X_player == user_id:
             view.stop()
-            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(user_id, -1))
+            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(user_id, -1, view.random))
         else:
             view.stop()
-            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(-1, user_id))
+            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(-1, user_id, view.random))
 
 class TicTacToeBotChooseSymbolView(discord.ui.View):
-    def __init__(self, player_id: int) -> None:
+    def __init__(self, player_id: int, random: bool = False) -> None:
         super().__init__()
         self.player_id = player_id
         self.player_choice = None
+        self.random = random
         self.add_item(ChooseSymbolButton(Symbol.X))
         self.add_item(ChooseSymbolButton(Symbol.O))
         self.add_item(ChooseSymbolButton(Symbol.RANDOM))
