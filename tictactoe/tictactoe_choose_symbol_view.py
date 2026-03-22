@@ -1,8 +1,11 @@
+import logging
 from random import choice
 
 import discord
 
 from .tictactoe_view import Symbol, TicTacToeView
+
+logger = logging.getLogger("cogs.tictactoe")
 
 
 class ChooseSymbolButton(discord.ui.Button['TicTacToeChooseSymbolView']):
@@ -23,15 +26,15 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeChooseSymbolView']):
         elif interaction.user.id == view.player_2:
             view.player_2_choice = self.symbol
         else:
-            interaction.response.send_message(content="You are not in the game", ephemeral=True)
+            await interaction.response.send_message(content="You are not in the game", ephemeral=True)
+            return
         
         if view.player_1_choice is not None and view.player_2_choice is not None:
             X_player = view.determine_X_player(view.player_1_choice, view.player_2_choice)
+            logger.info(f"<@{view.player_1}> chose {view.player_1_choice} and <@{view.player_2}> chose {view.player_2_choice}. <@{X_player}> goes first")
             O_player = view.player_1 if X_player == view.player_2 else view.player_2
             view.stop()
             await interaction.response.edit_message(content=f"It is now <@{X_player}>'s turn", view=TicTacToeView(X_player, O_player))
-        
-        await interaction.response.defer()
 
 class TicTacToeChooseSymbolView(discord.ui.View):
     def __init__(self, player_1_id: int, player_2_id: int) -> None:
