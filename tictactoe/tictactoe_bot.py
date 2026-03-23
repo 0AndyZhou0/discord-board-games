@@ -1,5 +1,5 @@
 from enum import IntEnum
-from random import choice
+from random import choice, shuffle
 
 
 class Symbol(IntEnum):
@@ -95,8 +95,7 @@ class TicTacToeBot:
             for j in range(3):
                 if board[i][j] == 0:
                     empty_cells.append((i, j))
-        return empty_cells
-    
+        return shuffle(empty_cells)
     def check_for_win(board: list[list[Symbol]]) -> Symbol | None:
         for row in board:
             if row[0] == row[1] == row[2] != Symbol.EMPTY:
