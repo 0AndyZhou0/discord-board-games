@@ -150,7 +150,8 @@ class TicTacToeBotView(discord.ui.View):
         return None
     
     def good_move(self) -> tuple[int, int] | None:
-        x, y = TicTacToeBot.find_best_move(self.board, self.bot_symbol)
+        # x, y = TicTacToeBot.find_best_move(self.board, self.bot_symbol)
+        x, y = TicTacToeBot.find_best_move_first_weighted(self.board, self.bot_symbol)
         self.place_bot_symbol(x, y)
         return (x, y)
     

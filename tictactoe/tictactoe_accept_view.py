@@ -1,8 +1,6 @@
 import discord
 
-from cogs_and_functions.tictactoe.tictactoe_choose_symbol_view import (
-    TicTacToeChooseSymbolView,
-)
+from .tictactoe_choose_symbol_view import TicTacToeChooseSymbolView
 
 
 class AcceptButton(discord.ui.Button['TicTacToeAcceptView']):

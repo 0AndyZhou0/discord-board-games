@@ -1,4 +1,5 @@
 from enum import IntEnum
+from random import choice
 
 
 class Symbol(IntEnum):
@@ -58,6 +59,35 @@ class TicTacToeBot:
                     best_move = (x, y)
             return best_move
         raise Exception("Invalid symbol")
+    
+    def find_best_move_first_weighted(board: list[list[Symbol]], symbol: Symbol) -> tuple[int, int]:
+        if all(cell == Symbol.EMPTY for row in board for cell in row):
+            return TicTacToeBot.pick_first_move_weighted()
+        return TicTacToeBot.find_best_move(board, symbol)
+    
+    def pick_first_move_weighted() -> tuple[int, int]:
+        choices = [
+            # 8x corners
+            (0, 0),
+            (0, 2),
+            (2, 0),
+            (2, 2),
+            (0, 0),
+            (0, 2),
+            (2, 0),
+            (2, 2),
+            # 4x centers
+            (1, 1),
+            (1, 1),
+            (1, 1),
+            (1, 1),
+            # 4x edges
+            (0, 1),
+            (2, 1),
+            (1, 0),
+            (1, 2)
+        ]
+        return choice(choices)
     
     def find_empty_cells(board: list[list[Symbol]]) -> list[tuple[int, int]]:
         empty_cells = []

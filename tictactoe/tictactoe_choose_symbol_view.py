@@ -35,6 +35,10 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeChooseSymbolView']):
             O_player = view.player_1 if X_player == view.player_2 else view.player_2
             view.stop()
             await interaction.response.edit_message(content=f"It is now <@{X_player}>'s turn", view=TicTacToeView(X_player, O_player))
+            # I'm pretty sure this throws an error when both players choose at the same time
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        logger.error(error)
 
 class TicTacToeChooseSymbolView(discord.ui.View):
     def __init__(self, player_1_id: int, player_2_id: int) -> None:
