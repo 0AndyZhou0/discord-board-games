@@ -1,0 +1,2 @@
+based on [https://suragnair.github.io/posts/alphazero.htm](https://suragnair.github.io/posts/alphazero.html)
+and example [https://github.com/suragnair/alpha-zero-general](https://github.com/suragnair/alpha-zero-general/)
