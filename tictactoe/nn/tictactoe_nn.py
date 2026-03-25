@@ -93,8 +93,8 @@ class TicTacToeNNWrapper:
                 policy_losses.append(policy_loss.item())
                 evaluation_losses.append(evaluation_loss.item())
             
-            # print(f"Average e ^ policy loss: {sum(policy_losses) / len(policy_losses)}")
-            # print(f"Average evaluation loss: {sum(evaluation_losses) / len(evaluation_losses)}")
+            print(f"Average e ^ policy loss: {sum(policy_losses) / len(policy_losses)}")
+            print(f"Average evaluation loss: {sum(evaluation_losses) / len(evaluation_losses)}")
 
     def loss_policy(self, targets, outputs):  # noqa: ANN001, ANN201
         return -torch.sum(targets * outputs) / targets.size()[0]

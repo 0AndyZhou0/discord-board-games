@@ -18,7 +18,7 @@ class TrainTester:
         self.mcts = TicTacToe_MCTS(self.nn, c_puct)
         self.train_sets = []
 
-        self.train_set_max_len = 1000
+        self.train_set_max_len = 10
 
     def episode_from_empty(self, num_searches_per_episode_step: int = 100):  # noqa: ANN201
         tempTrainSet = []
@@ -33,11 +33,11 @@ class TrainTester:
             episodeStep += 1
 
             canonical_board = TicTacToe.get_canonical_board(board, curr_player)
-            probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
-            # if int(episodeStep < 5):
-            #     probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
-            # else:
-            #     probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
+            # probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
+            if int(episodeStep < 5):
+                probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
+            else:
+                probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
             # print(f"canonical_board: \n{TicTacToe.to_string(canonical_board)}\nprobabilities: {probabilities}\ncurr_player: {curr_player}")
             tempTrainSet.append((canonical_board, probabilities, curr_player))
 
@@ -64,7 +64,7 @@ class TrainTester:
                 self.mcts = TicTacToe_MCTS(self.nn, self.c_puct)
                 train_set = self.episode_from_empty(num_searches_per_episode_step)
                 self.train_sets.append(train_set) # TODO: Might be wrong
-        
+
             
             if len(self.train_sets) > self.train_set_max_len:
                 self.train_sets = self.train_sets[1:]
@@ -74,7 +74,7 @@ class TrainTester:
             for train_set in self.train_sets:
                 current_train_set.extend(train_set)
             shuffle(current_train_set)
-            current_train_set = current_train_set[:len(current_train_set) // 10]
+            # current_train_set = current_train_set[:len(current_train_set) // 10]
 
             # print random samples
             for i in range(10):
@@ -88,15 +88,17 @@ class TrainTester:
             self.new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
             self.new_nn.load_model("./temp.pth")
 
-            self.new_nn.train(current_train_set, 10, 100)
+            self.new_nn.train(current_train_set, 10, 64)
 
             old_wins, ties, new_wins = self.battles(self.nn, self.new_nn, num_games_in_battle, num_searches_per_battle)
 
             print(f"Old Wins: {old_wins}, Ties: {ties}, New Wins: {new_wins}")
 
             if (new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold:
+                logger.debug("Updating best model")
                 self.new_nn.save_model("./best.pth")
             else:
+                logger.debug("Not updating best model")
                 self.nn.save_model("./best.pth")
 
     # TODO: Move to separate class
@@ -188,7 +190,7 @@ if __name__ == "__main__":
     tester = TrainTester(random_nn, 1)
     
     # Training
-    tester.train(num_iters=10, num_episodes=1000, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.5)
+    tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
 
     # Bot Battle
     # nn0 = TicTacToeNN()
@@ -197,7 +199,7 @@ if __name__ == "__main__":
     # nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     # nn0wrapper.load_model("best.pth")
     # # nn1wrapper.load_model("best.pth")
-    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 100, 100, True)
+    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 100, 10, True)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
     # # score = tester.battle(mcts0, mcts1, 100, True)
     # # print(score)
