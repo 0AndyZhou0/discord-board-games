@@ -33,11 +33,11 @@ class TrainTester:
             episodeStep += 1
 
             canonical_board = TicTacToe.get_canonical_board(board, curr_player)
-            # probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
-            if int(episodeStep < 5):
-                probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
-            else:
-                probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
+            probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
+            # if int(episodeStep < 5):
+            #     probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
+            # else:
+            #     probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
             # print(f"canonical_board: \n{TicTacToe.to_string(canonical_board)}\nprobabilities: {probabilities}\ncurr_player: {curr_player}")
             tempTrainSet.append((canonical_board, probabilities, curr_player))
 
@@ -77,11 +77,11 @@ class TrainTester:
             current_train_set = current_train_set[:len(current_train_set) // 10]
 
             # print random samples
-            # for i in range(10):
-            #     print(len(current_train_set))
-            #     print(TicTacToe.to_string(current_train_set[i][0]))
-            #     print(current_train_set[i][1])
-            #     print(current_train_set[i][2])
+            for i in range(10):
+                logger.debug(len(current_train_set))
+                logger.debug(TicTacToe.to_string(current_train_set[i][0]))
+                logger.debug(current_train_set[i][1])
+                logger.debug(current_train_set[i][2])
 
 
             self.nn.save_model("./temp.pth")
@@ -100,7 +100,7 @@ class TrainTester:
                 self.nn.save_model("./best.pth")
 
     # TODO: Move to separate class
-    def battles(self, nn0: TicTacToeNNWrapper, nn1: TicTacToeNNWrapper, num_games: int, num_searches_per_move: int = 100, verbose: bool = False) -> tuple[int, int, int]:
+    def battles(self, nn0: TicTacToeNNWrapper, nn1: TicTacToeNNWrapper, num_games: int, num_searches_per_move: int = 10, verbose: bool = False) -> tuple[int, int, int]:
         """
         Returns:
             (nn0 wins, ties, nn1 wins)
@@ -135,11 +135,10 @@ class TrainTester:
                 else:
                     ties += 1
         
-        if verbose:
-            print(f"x wins: {wins_x}, o wins: {wins_o}, ties: {ties}")
+        logger.debug(f"x wins: {wins_x}, o wins: {wins_o}, ties: {ties}")
         return wins_0, ties, wins_1
 
-    def battle(self, mcts0: TicTacToe_MCTS, mcts1: TicTacToe_MCTS, num_searches_per_move: int = 100, verbose: bool = False) -> tuple[int, int, int]:
+    def battle(self, mcts0: TicTacToe_MCTS, mcts1: TicTacToe_MCTS, num_searches_per_move: int = 10, verbose: bool = False) -> tuple[int, int, int]:
         """
         Returns:
             1 if first player wins, 0 for tie, -1 if second player wins
@@ -183,7 +182,7 @@ if __name__ == "__main__":
     if Path.exists("best.pth"):
         best_nn.load_model("best.pth")
 
-    # logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     logging.getLogger("cogs.tictactoe.nn.mcts").setLevel(logging.DEBUG)
     # logger.setLevel(logging.ERROR)
     tester = TrainTester(random_nn, 1)
