@@ -4,6 +4,7 @@ from random import shuffle
 
 import numpy as np
 import torch
+from battle import Battle
 from tictactoe import TicTacToe
 from tictactoe_mcts import TicTacToe_MCTS
 from tictactoe_nn import TicTacToeNN, TicTacToeNNWrapper
@@ -83,7 +84,7 @@ class TrainTester:
         curr_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
         curr_nn.load_model(f"{self.parent_dir_model}/temp.pth")
 
-        wins_against_random, ties_against_random, _ = self.battles(curr_nn, random_nn, num_games_in_battle, num_searches_per_battle)
+        wins_against_random, ties_against_random, _ = Battle.battles(curr_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
         best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
         logger.debug(f"Preliminary best wins against random: {best_against_random}")
         
@@ -128,8 +129,8 @@ class TrainTester:
             self.new_nn.train(current_train_set, 10, 64)
             random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
 
-            old_wins, ties, new_wins = self.battles(self.nn, self.new_nn, num_games_in_battle, num_searches_per_battle)
-            wins_against_random, ties_against_random, _ = self.battles(self.new_nn, random_nn, num_games_in_battle, num_searches_per_battle)
+            old_wins, ties, new_wins = Battle.battles(self.nn, self.new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
+            wins_against_random, ties_against_random, _ = Battle.battles(self.new_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
 
             print(f"Old Wins: {old_wins}, Ties: {ties}, New Wins: {new_wins}")
             print(f"New Wins against random: {wins_against_random}, Ties against random: {ties_against_random}")
@@ -142,75 +143,6 @@ class TrainTester:
             else:
                 logger.debug("Not updating best model")
                 self.nn.save_model(f"{self.parent_dir_model}/best.pth")
-
-    # TODO: Move to separate class
-    def battles(self, nn0: TicTacToeNNWrapper, nn1: TicTacToeNNWrapper, num_games: int, num_searches_per_move: int = 10, verbose: bool = False) -> tuple[int, int, int]:
-        """
-        Returns:
-            (nn0 wins, ties, nn1 wins)
-        """
-        wins_0 = 0
-        ties = 0
-        wins_1 = 0
-        wins_x = 0
-        wins_o = 0
-        for i in range(num_games):
-            # Reset mcts for each game
-            mcts0 = TicTacToe_MCTS(nn0, self.c_puct)
-            mcts1 = TicTacToe_MCTS(nn1, self.c_puct)
-            if i % 2 == 0:
-                results = self.battle(mcts0, mcts1, num_searches_per_move, verbose)
-                if results == 1:
-                    wins_0 += 1
-                    wins_x += 1
-                elif results == -1:
-                    wins_1 += 1
-                    wins_o += 1
-                else:
-                    ties += 1
-            else:
-                results = self.battle(mcts1, mcts0, num_searches_per_move, verbose)
-                if results == 1:
-                    wins_1 += 1
-                    wins_x += 1
-                elif results == -1:
-                    wins_0 += 1
-                    wins_o += 1
-                else:
-                    ties += 1
-        
-        logger.debug(f"x wins: {wins_x}, o wins: {wins_o}, ties: {ties}")
-        return wins_0, ties, wins_1
-
-    def battle(self, mcts0: TicTacToe_MCTS, mcts1: TicTacToe_MCTS, num_searches_per_move: int = 10, verbose: bool = False) -> tuple[int, int, int]:
-        """
-        Returns:
-            1 if first player wins, 0 for tie, -1 if second player wins
-        """
-        board = TicTacToe.get_empty_board()
-        curr_player = -1
-        turn = 0
-
-        while TicTacToe.get_game_ended(board) is None:
-            turn += 1
-            if verbose:
-                logger.debug(f"Turn {turn}\n{TicTacToe.to_string(board)}")
-            
-            canonical_board = TicTacToe.get_canonical_board(board, curr_player)
-            if turn % 2 == 1:
-                action = np.argmax(mcts0.get_best_actions(canonical_board, num_searches_per_move))
-            else:
-                action = np.argmax(mcts1.get_best_actions(canonical_board, num_searches_per_move))
-            empty_squares = TicTacToe.get_empty_squares_mask(board)
-            assert len(empty_squares) > 0
-
-            next_board, next_player = TicTacToe.get_next_board(board, curr_player, action)
-            board, curr_player = next_board, next_player
-        
-        if verbose:
-            print(f"Final board:\n{TicTacToe.to_string(board)}")
-            print(f"Winner: {TicTacToe.get_game_ended(board)}")
-        return -TicTacToe.get_game_ended(board)
 
 def evaluate_board(nn: TicTacToeNNWrapper, board: np.array) -> tuple[torch.Tensor, torch.Tensor]:
     mcts = TicTacToe_MCTS(nn, 1)
@@ -242,9 +174,9 @@ if __name__ == "__main__":
     # nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
     # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
-    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 1000, 10, False)
+    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 1000, 10, False)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
-    # # score = tester.battle(mcts0, mcts1, 100, True)
+    # # score = Battle.battle(mcts0, mcts1, 100, True)
     # # print(score)
 
     # Manual Test
