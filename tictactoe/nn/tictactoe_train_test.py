@@ -27,7 +27,7 @@ class TrainTester:
         episodeStep = 0
 
         # Reset mcts
-        self.mcts = TicTacToe_MCTS(self.nn, self.c_puct)
+        # self.mcts = TicTacToe_MCTS(self.nn, self.c_puct)
 
         while True:
             episodeStep += 1
@@ -187,22 +187,22 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logging.getLogger("cogs.tictactoe.nn.mcts").setLevel(logging.DEBUG)
     # logger.setLevel(logging.ERROR)
-    tester = TrainTester(random_nn, 1)
+    tester = TrainTester(best_nn, 1)
     
     # Training
-    tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
+    # tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
 
     # Bot Battle
-    # nn0 = TicTacToeNN()
-    # nn1 = TicTacToeNN()
-    # nn0wrapper = TicTacToeNNWrapper(nn0, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    # nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    # nn0wrapper.load_model("best.pth")
-    # # nn1wrapper.load_model("best.pth")
-    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 100, 10, True)
-    # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
-    # # score = tester.battle(mcts0, mcts1, 100, True)
-    # # print(score)
+    nn0 = TicTacToeNN()
+    nn1 = TicTacToeNN()
+    nn0wrapper = TicTacToeNNWrapper(nn0, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    nn0wrapper.load_model("best.pth")
+    # nn1wrapper.load_model("best.pth")
+    mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 100, 10, True)
+    print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
+    # score = tester.battle(mcts0, mcts1, 100, True)
+    # print(score)
 
     # Manual Test
     # board = TicTacToe.get_empty_board()
