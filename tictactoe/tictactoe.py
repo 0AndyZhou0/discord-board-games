@@ -15,7 +15,7 @@ class TicTacToe(commands.Cog):
         self.bot = bot
 
     @commands.command(name="tictactoe", aliases=["ttt"], description="Starts a tictactoe game", help="Starts a tictactoe game")
-    async def tictactoe(self, ctx: commands.Context, mode: str = commands.parameter(default=None, description="Optional[solo, bot, random]", displayed_name="mode:")) -> None:
+    async def tictactoe(self, ctx: commands.Context, mode: str = commands.parameter(default=None, description="Optional[solo, bot, random, nn]", displayed_name="mode:")) -> None:
         logger.info("tictactoe game started")
         user = ctx.author.id
         match mode:

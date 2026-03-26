@@ -180,7 +180,7 @@ class TicTacToeBotView(discord.ui.View):
     
     def mcts_nn_move(self) -> tuple[int, int] | None:
         assert self.mcts is not None
-        action = np.argmax(self.mcts.get_best_actions(self.board, 100))
+        action = np.argmax(self.mcts.get_best_actions(self.board, 10))
         x, y = action // 3, action % 3
         self.place_bot_symbol(x, y)
         return (x, y)

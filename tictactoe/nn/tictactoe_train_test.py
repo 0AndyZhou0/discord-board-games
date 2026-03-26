@@ -34,8 +34,9 @@ class TrainTester:
         tempTrainSet = []
         board = TicTacToe.get_empty_board()
         player = -1
-        # Create random board
-        for i in range(self.random.integers(0, 8)):
+        # Create random board weighted by number of moves
+        reverse_prob = [i / sum(range(7, -1, -1)) for i in range(7, -1, -1)]
+        for i in range(self.random.choice(8, p=reverse_prob)):
             action = self.random.choice(9, p=TicTacToe.get_empty_squares_mask(board)/sum(TicTacToe.get_empty_squares_mask(board)))
             next_board, next_player = TicTacToe.get_next_board(board, player, action)
             if TicTacToe.get_game_ended(next_board) is not None:
