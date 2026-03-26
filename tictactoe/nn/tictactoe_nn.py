@@ -15,6 +15,14 @@ class TicTacToeNN(nn.Module):
         self.bn1 = nn.BatchNorm2d(64)
         self.bn2 = nn.BatchNorm2d(64)
         self.bn3 = nn.BatchNorm2d(64)
+
+        self.fc1 = nn.Linear(64 * 3 * 3, 64 * 3 * 3)
+        self.fc2 = nn.Linear(64 * 3 * 3, 64 * 3 * 3)
+        self.fc_bn1 = nn.BatchNorm1d(64 * 3 * 3)
+        self.fc_bn2 = nn.BatchNorm1d(64 * 3 * 3)
+        self.dropout1 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.25)
+
         self.policy = nn.Linear(64 * 3 * 3, 9)
         self.evaluation = nn.Linear(64 * 3 * 3, 1)
 
@@ -32,7 +40,15 @@ class TicTacToeNN(nn.Module):
         input = input.view(-1, 64 * 3 * 3)
 
         # Dropout
-        # input = nn.functional.dropout()
+        input = self.fc1(input)
+        input = self.fc_bn1(input)
+        input = nn.functional.relu(input)
+        input = self.dropout1(input)
+
+        input = self.fc2(input)
+        input = self.fc_bn2(input)
+        input = nn.functional.relu(input)
+        input = self.dropout2(input)
 
         policy: torch.Tensor = self.policy(input)
         evaluation: torch.Tensor = self.evaluation(input)
