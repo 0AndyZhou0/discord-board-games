@@ -141,8 +141,8 @@ class TrainTester:
             print(f"Old Wins: {old_wins}, Ties: {ties}, New Wins: {new_wins}")
             print(f"New Wins against random: {wins_against_random}, Ties against random: {ties_against_random}")
 
-            # if (new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold:
-            if new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle > best_against_random:
+            if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold)\
+                or (new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle > best_against_random):
                 best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
                 logger.debug("Updating best model")
                 self.new_nn.save_model(f"{self.parent_dir_model}/best.pt")
