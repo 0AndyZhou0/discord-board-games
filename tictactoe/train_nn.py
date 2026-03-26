@@ -27,7 +27,6 @@ if __name__ == "__main__":
     random_nn = TicTacToeNNWrapper(TicTacToeNN(), torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     tester = TrainTester(best_nn, 1)
 
-    print(f"{tester.parent_dir_model}/best.pt")
     if Path.exists(f"{tester.parent_dir_model}/best.pt"):
         best_nn.load_model(f"{tester.parent_dir_model}/best.pt")
 
@@ -36,7 +35,7 @@ if __name__ == "__main__":
     # logger.setLevel(logging.ERROR)
     
     # Training
-    # tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
+    tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
 
     # Bot Battle
     # nn0 = TicTacToeNN()
@@ -51,40 +50,40 @@ if __name__ == "__main__":
     # # print(score)
 
     # Manual Test
-    board = TicTacToe.get_empty_board()
-    print("Best NN:")
-    evaluate_board(best_nn, board)
-    print("Random NN:")
-    evaluate_board(random_nn, board)
+    # board = TicTacToe.get_empty_board()
+    # print("Best NN:")
+    # evaluate_board(best_nn, board)
+    # print("Random NN:")
+    # evaluate_board(random_nn, board)
 
-    board = np.array([[-1, 0, 0], 
-                      [0, 1, 0], 
-                      [1, 0, -1]])
-    print("Best NN:")
-    evaluate_board(best_nn, board)
-    print("Random NN:")
-    evaluate_board(random_nn, board)
+    # board = np.array([[-1, 0, 0], 
+    #                   [0, 1, 0], 
+    #                   [1, 0, -1]])
+    # print("Best NN:")
+    # evaluate_board(best_nn, board)
+    # print("Random NN:")
+    # evaluate_board(random_nn, board)
 
-    board = np.array([[-1, 0, -1], 
-                      [0, 1, 0], 
-                      [1, 0, -1]])
-    print("Best NN:")
-    evaluate_board(best_nn, board)
-    print("Random NN:")
-    evaluate_board(random_nn, board)
+    # board = np.array([[-1, 0, -1], 
+    #                   [0, 1, 0], 
+    #                   [1, 0, -1]])
+    # print("Best NN:")
+    # evaluate_board(best_nn, board)
+    # print("Random NN:")
+    # evaluate_board(random_nn, board)
 
-    board = np.array([[-1, 1, -1], 
-                      [0, 1, 0], 
-                      [1, 0, -1]])
-    print("Best NN:")
-    evaluate_board(best_nn, board)
-    print("Random NN:")
-    evaluate_board(random_nn, board)
+    # board = np.array([[-1, 1, -1], 
+    #                   [0, 1, 0], 
+    #                   [1, 0, -1]])
+    # print("Best NN:")
+    # evaluate_board(best_nn, board)
+    # print("Random NN:")
+    # evaluate_board(random_nn, board)
 
-    board = np.array([[1, -1, 0], 
-                      [0, -1, 0], 
-                      [1, 0, 0]])
-    print("Best NN:")
-    evaluate_board(best_nn, board)
-    print("Random NN:")
-    evaluate_board(random_nn, board)
+    # board = np.array([[1, -1, 0], 
+    #                   [0, -1, 0], 
+    #                   [1, 0, 0]])
+    # print("Best NN:")
+    # evaluate_board(best_nn, board)
+    # print("Random NN:")
+    # evaluate_board(random_nn, board)

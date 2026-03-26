@@ -43,7 +43,6 @@ class TrainTester:
                 break
             board = next_board
             player = next_player
-        # logger.debug(TicTacToe.to_string(board))
         curr_player = player
         episodeStep = 0
 
@@ -55,7 +54,7 @@ class TrainTester:
 
             canonical_board = TicTacToe.get_canonical_board(board, curr_player)
             # probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
-            if int(episodeStep < 5):
+            if int(episodeStep > 5):
                 probabilities = self.mcts.get_best_actions(canonical_board, num_searches_per_episode_step)
             else:
                 probabilities = self.mcts.do_n_searches(canonical_board, num_searches_per_episode_step)
@@ -70,7 +69,13 @@ class TrainTester:
             r = TicTacToe.get_game_ended(board)
 
             if r is not None:
-                return [(x[0], x[1], r * x[2] * curr_player) for x in tempTrainSet]
+                # print(r, -curr_player)
+                # for ex in tempTrainSet:
+                #     print(TicTacToe.to_string(ex[0]))
+                #     print(TicTacToe.get_canonical_board(ex[0], ex[2]))
+                #     print(ex[1], ex[2], r * ex[2])
+                # raise Exception("Game ended")
+                return [(x[0], x[1], r * x[2]) for x in tempTrainSet]
 
     def save_train_sets(self, path: str = "./train_sets.npy") -> None:
         np.save(path, np.array(self.train_sets, dtype=object), allow_pickle=True)
@@ -118,8 +123,7 @@ class TrainTester:
 
             # print random samples
             for i in range(10):
-                logger.debug(len(current_train_set))
-                logger.debug(TicTacToe.to_string(current_train_set[i][0]))
+                logger.debug(f"Sample {i}\n{TicTacToe.to_string(current_train_set[i][0])}")
                 logger.debug(current_train_set[i][1])
                 logger.debug(current_train_set[i][2])
 
@@ -145,10 +149,3 @@ class TrainTester:
             else:
                 logger.debug("Not updating best model")
                 self.nn.save_model(f"{self.parent_dir_model}/best.pt")
-
-def evaluate_board(nn: TicTacToeNNWrapper, board: np.array) -> tuple[torch.Tensor, torch.Tensor]:
-    mcts = TicTacToe_MCTS(nn, 1)
-    print(TicTacToe.to_string(board))
-    canonical_board = TicTacToe.get_canonical_board(board, TicTacToe.get_current_player(board))
-    print(TicTacToe.to_string(canonical_board))
-    print("nn:", mcts.do_n_searches(canonical_board, 10))
