@@ -43,6 +43,13 @@ class TrainTester:
                 break
             board = next_board
             player = next_player
+        
+        # Debug Test
+        # board = np.array([[0, -1, 0], 
+        #                   [-1, 1, 0], 
+        #                   [1, 1, -1]])
+        # player = -1
+
         curr_player = player
         episodeStep = 0
 
@@ -71,6 +78,7 @@ class TrainTester:
             if r is not None:
                 # print(r, -curr_player)
                 # for ex in tempTrainSet:
+                #     print(TicTacToe.to_string(board))
                 #     print(TicTacToe.to_string(ex[0]))
                 #     print(TicTacToe.get_canonical_board(ex[0], ex[2]))
                 #     print(ex[1], ex[2], r * ex[2])
@@ -127,7 +135,7 @@ class TrainTester:
             self.new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
 
-            self.new_nn.train(current_train_set, 10, 512)
+            self.new_nn.train(current_train_set, 10, 128)
             random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
 
             old_wins, ties, new_wins = Battle.battles(self.nn, self.new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
