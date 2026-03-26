@@ -16,7 +16,14 @@ class TrainTester:
         self.nn = nn
         self.c_puct = c_puct
         self.mcts = TicTacToe_MCTS(self.nn, c_puct)
+        self.parent_dir = Path(__file__).parent
+        self.parent_dir_model = str(self.parent_dir) + "/models"
+        Path(self.parent_dir_model).mkdir(parents=True, exist_ok=True)
+
+        self.train_sets_path = f"{self.parent_dir}/train_sets.npy"
         self.train_sets = []
+        if Path(self.train_sets_path).exists():
+            self.load_train_sets(self.train_sets_path)
         self.random = np.random.default_rng()
 
         self.train_set_max_len = 10
@@ -62,16 +69,19 @@ class TrainTester:
             if r is not None:
                 return [(x[0], x[1], r * x[2] * curr_player) for x in tempTrainSet]
 
+    def save_train_sets(self, path: str = "./train_sets.npy") -> None:
+        np.save(path, np.array(self.train_sets, dtype=object), allow_pickle=True)
 
-
+    def load_train_sets(self, path: str = "./train_sets.npy") -> None:
+        self.train_sets = np.load(path, allow_pickle=True).tolist()
 
     def train(self, num_iters: int = 10, num_episodes: int = 1000, num_searches_per_episode_step: int = 20, num_games_in_battle: int = 100, num_searches_per_battle: int = 10, update_threshold: float = 0.5001) -> None:
         # Battle against random
         best_against_random = 0
         random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        self.nn.save_model("./temp.pth")
+        self.nn.save_model(f"{self.parent_dir_model}/temp.pth")
         curr_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        curr_nn.load_model("./temp.pth")
+        curr_nn.load_model(f"{self.parent_dir_model}/temp.pth")
 
         wins_against_random, ties_against_random, _ = self.battles(curr_nn, random_nn, num_games_in_battle, num_searches_per_battle)
         best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
@@ -79,7 +89,7 @@ class TrainTester:
         
         for iter in range(num_iters):
             if iter > 1:
-                self.nn.load_model("./best.pth")
+                self.nn.load_model(f"{self.parent_dir_model}/best.pth")
 
             for episode in range(num_episodes):
                 logger.debug(f"Episode {episode}")
@@ -90,7 +100,8 @@ class TrainTester:
             
             if len(self.train_sets) > self.train_set_max_len:
                 self.train_sets = self.train_sets[1:]
-            
+            self.save_train_sets(self.train_sets_path)
+
 
             current_train_set = []
             for train_set in self.train_sets:
@@ -110,9 +121,9 @@ class TrainTester:
                 logger.debug(current_train_set[i][2])
 
 
-            self.nn.save_model("./temp.pth")
+            self.nn.save_model(f"{self.parent_dir_model}/temp.pth")
             self.new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-            self.new_nn.load_model("./temp.pth")
+            self.new_nn.load_model(f"{self.parent_dir_model}/temp.pth")
 
             self.new_nn.train(current_train_set, 10, 64)
             random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
@@ -127,10 +138,10 @@ class TrainTester:
             if new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle > best_against_random:
                 best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
                 logger.debug("Updating best model")
-                self.new_nn.save_model("./best.pth")
+                self.new_nn.save_model(f"{self.parent_dir_model}/best.pth")
             else:
                 logger.debug("Not updating best model")
-                self.nn.save_model("./best.pth")
+                self.nn.save_model(f"{self.parent_dir_model}/best.pth")
 
     # TODO: Move to separate class
     def battles(self, nn0: TicTacToeNNWrapper, nn1: TicTacToeNNWrapper, num_games: int, num_searches_per_move: int = 10, verbose: bool = False) -> tuple[int, int, int]:
@@ -212,13 +223,14 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     best_nn = TicTacToeNNWrapper(TicTacToeNN(), torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     random_nn = TicTacToeNNWrapper(TicTacToeNN(), torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    if Path.exists("best.pth"):
-        best_nn.load_model("best.pth")
+    tester = TrainTester(best_nn, 1)
+
+    if Path.exists(f"{tester.parent_dir_model}/best.pth"):
+        best_nn.load_model(f"{tester.parent_dir_model}/best.pth")
 
     logger.setLevel(logging.DEBUG)
     logging.getLogger("cogs.tictactoe.nn.mcts").setLevel(logging.DEBUG)
     # logger.setLevel(logging.ERROR)
-    tester = TrainTester(best_nn, 1)
     
     # Training
     tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
@@ -228,9 +240,9 @@ if __name__ == "__main__":
     # nn1 = TicTacToeNN()
     # nn0wrapper = TicTacToeNNWrapper(nn0, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     # nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    # nn0wrapper.load_model("best.pth")
-    # # nn1wrapper.load_model("best.pth")
-    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 100, 10, False)
+    # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
+    # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
+    # mcts0_score, mcts0_ties, mcts1_score = tester.battles(nn0wrapper, nn1wrapper, 1000, 10, False)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
     # # score = tester.battle(mcts0, mcts1, 100, True)
     # # print(score)

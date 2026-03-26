@@ -62,10 +62,10 @@ class TicTacToeNNWrapper:
         if device.type == "cuda":
             self.nn.cuda()
 
-    def load_model(self, path: str) -> None:
+    def load_model(self, path: str = "./model.pt") -> None:
         self.nn.load_state_dict(torch.load(path, map_location=self.device))
 
-    def save_model(self, path: str) -> None:
+    def save_model(self, path: str = "./model.pt") -> None:
         torch.save(self.nn.state_dict(), path)
 
     def evaluate_board(self, board: np.array) -> tuple[torch.Tensor, torch.Tensor]:
