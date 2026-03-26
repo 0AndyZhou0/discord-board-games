@@ -1,13 +1,23 @@
 import logging
 from enum import IntEnum
+from pathlib import Path
 from random import choice
 
 import discord
+import numpy as np
+import torch
 
+from .nn.tictactoe_mcts import TicTacToe_MCTS
+from .nn.tictactoe_nn import TicTacToeNN, TicTacToeNNWrapper
 from .tictactoe_bot import TicTacToeBot
 
-logger = logging.getLogger("cogs.tictactoe")
+logger = logging.getLogger("cogs.tictactoe.bot")
 logger.setLevel(logging.INFO)
+
+class Bot_Mode(IntEnum):
+    RANDOM = 0
+    MINIMAX = 1
+    MCTS_NN = 2
 
 class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
     def __init__(self, x: int, y: int) -> None:
@@ -81,16 +91,21 @@ class Symbol(IntEnum):
     RANDOM = 3
 
 class TicTacToeBotView(discord.ui.View):
-    def __init__(self, player_X_id: int, player_O_id: int, random: bool = False) -> None:
+    def __init__(self, player_X_id: int, player_O_id: int, mode: Bot_Mode) -> None:
         super().__init__()
 
         self.player = player_X_id if player_X_id != -1 else player_O_id
         self.player_symbol = Symbol.X if player_X_id != -1 else Symbol.O
         self.bot_symbol = Symbol.X if player_X_id == -1 else Symbol.O
-        self.random = random
-        self.winner = None
+        self.mode = mode
+        if mode == Bot_Mode.MCTS_NN:
+            path = Path(__file__).parent / "nn" / "models"
+            nn_wrapper = TicTacToeNNWrapper(TicTacToeNN(), torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+            nn_wrapper.load_model(path / "best.pt")
+            self.mcts = TicTacToe_MCTS(nn_wrapper, 1)
 
         self.board = [[Symbol.EMPTY] * 3 for _ in range(3)]
+        self.winner = None
         
         for x in range(3):
             for y in range(3):
@@ -130,10 +145,15 @@ class TicTacToeBotView(discord.ui.View):
         return Symbol.TIE
         
     def bot_move(self) -> None:
-        if self.random:
-            self.random_move()
-        else:
-            self.good_move()
+        match self.mode:
+            case Bot_Mode.RANDOM:
+                self.random_move()
+            case Bot_Mode.MINIMAX:
+                self.minimax_move()
+            case Bot_Mode.MCTS_NN:
+                self.mcts_nn_move()
+            case _:
+                raise Exception("Invalid bot mode")
 
     def random_move(self) -> tuple[int, int] | None:
         empty_squares = []
@@ -149,11 +169,22 @@ class TicTacToeBotView(discord.ui.View):
 
         return None
     
-    def good_move(self) -> tuple[int, int] | None:
+    def minimax_move(self) -> tuple[int, int] | None:
+        """
+        Will return non losing move or winning move if there is one
+        """
         # x, y = TicTacToeBot.find_best_move(self.board, self.bot_symbol)
         x, y = TicTacToeBot.find_best_move_first_weighted(self.board, self.bot_symbol)
         self.place_bot_symbol(x, y)
         return (x, y)
+    
+    def mcts_nn_move(self) -> tuple[int, int] | None:
+        assert self.mcts is not None
+        action = np.argmax(self.mcts.get_best_actions(self.board, 100))
+        x, y = action // 3, action % 3
+        self.place_bot_symbol(x, y)
+        return (x, y)
+
     
     def place_bot_symbol(self, x: int, y: int) -> None:
         self.place_symbol(x, y, self.bot_symbol)

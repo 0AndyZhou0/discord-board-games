@@ -1,8 +1,9 @@
 import logging
 
 import numpy as np
-from tictactoe import TicTacToe
-from tictactoe_nn import TicTacToeNNWrapper
+
+from .tictactoe import TicTacToe
+from .tictactoe_nn import TicTacToeNNWrapper
 
 logger = logging.getLogger("cogs.tictactoe.nn.mcts")
 

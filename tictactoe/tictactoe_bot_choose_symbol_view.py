@@ -2,7 +2,7 @@ from random import choice
 
 import discord
 
-from .tictactoe_bot_view import Symbol, TicTacToeBotView
+from .tictactoe_bot_view import Bot_Mode, Symbol, TicTacToeBotView
 
 
 class ChooseSymbolButton(discord.ui.Button['TicTacToeBotChooseSymbolView']):
@@ -32,17 +32,17 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeBotChooseSymbolView']):
 
         if X_player == user_id:
             view.stop()
-            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(user_id, -1, view.random))
+            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(user_id, -1, view.mode))
         else:
             view.stop()
-            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(-1, user_id, view.random))
+            await interaction.response.edit_message(content=f"It is now <@{user_id}>'s turn", view=TicTacToeBotView(-1, user_id, view.mode))
 
 class TicTacToeBotChooseSymbolView(discord.ui.View):
-    def __init__(self, player_id: int, random: bool = False) -> None:
+    def __init__(self, player_id: int, mode: Bot_Mode) -> None:
         super().__init__()
         self.player_id = player_id
         self.player_choice = None
-        self.random = random
+        self.mode = mode
         self.add_item(ChooseSymbolButton(Symbol.X))
         self.add_item(ChooseSymbolButton(Symbol.O))
         self.add_item(ChooseSymbolButton(Symbol.RANDOM))

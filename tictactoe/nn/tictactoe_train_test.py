@@ -4,10 +4,11 @@ from random import shuffle
 
 import numpy as np
 import torch
-from battle import Battle
-from tictactoe import TicTacToe
-from tictactoe_mcts import TicTacToe_MCTS
-from tictactoe_nn import TicTacToeNN, TicTacToeNNWrapper
+
+from .battle import Battle
+from .tictactoe import TicTacToe
+from .tictactoe_mcts import TicTacToe_MCTS
+from .tictactoe_nn import TicTacToeNN, TicTacToeNNWrapper
 
 logging.basicConfig()
 logger = logging.getLogger("cogs.tictactoe.nn.train_test")
@@ -80,9 +81,9 @@ class TrainTester:
         # Battle against random
         best_against_random = 0
         random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        self.nn.save_model(f"{self.parent_dir_model}/temp.pth")
+        self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
         curr_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        curr_nn.load_model(f"{self.parent_dir_model}/temp.pth")
+        curr_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
         wins_against_random, ties_against_random, _ = Battle.battles(curr_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
         best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
@@ -90,7 +91,7 @@ class TrainTester:
         
         for iter in range(num_iters):
             if iter > 1:
-                self.nn.load_model(f"{self.parent_dir_model}/best.pth")
+                self.nn.load_model(f"{self.parent_dir_model}/best.pt")
 
             for episode in range(num_episodes):
                 logger.debug(f"Episode {episode}")
@@ -122,9 +123,9 @@ class TrainTester:
                 logger.debug(current_train_set[i][2])
 
 
-            self.nn.save_model(f"{self.parent_dir_model}/temp.pth")
+            self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
             self.new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-            self.new_nn.load_model(f"{self.parent_dir_model}/temp.pth")
+            self.new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
             self.new_nn.train(current_train_set, 10, 64)
             random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
@@ -139,10 +140,10 @@ class TrainTester:
             if new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle > best_against_random:
                 best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
                 logger.debug("Updating best model")
-                self.new_nn.save_model(f"{self.parent_dir_model}/best.pth")
+                self.new_nn.save_model(f"{self.parent_dir_model}/best.pt")
             else:
                 logger.debug("Not updating best model")
-                self.nn.save_model(f"{self.parent_dir_model}/best.pth")
+                self.nn.save_model(f"{self.parent_dir_model}/best.pt")
 
 def evaluate_board(nn: TicTacToeNNWrapper, board: np.array) -> tuple[torch.Tensor, torch.Tensor]:
     mcts = TicTacToe_MCTS(nn, 1)
@@ -157,8 +158,8 @@ if __name__ == "__main__":
     random_nn = TicTacToeNNWrapper(TicTacToeNN(), torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     tester = TrainTester(best_nn, 1)
 
-    if Path.exists(f"{tester.parent_dir_model}/best.pth"):
-        best_nn.load_model(f"{tester.parent_dir_model}/best.pth")
+    if Path.exists(f"{tester.parent_dir_model}/best.pt"):
+        best_nn.load_model(f"{tester.parent_dir_model}/best.pt")
 
     logger.setLevel(logging.DEBUG)
     logging.getLogger("cogs.tictactoe.nn.mcts").setLevel(logging.DEBUG)
@@ -172,8 +173,8 @@ if __name__ == "__main__":
     # nn1 = TicTacToeNN()
     # nn0wrapper = TicTacToeNNWrapper(nn0, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     # nn1wrapper = TicTacToeNNWrapper(nn1, torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-    # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
-    # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pth")
+    # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
+    # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
     # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 1000, 10, False)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
     # # score = Battle.battle(mcts0, mcts1, 100, True)

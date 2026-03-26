@@ -1,5 +1,6 @@
 import numpy as np
-from board import Symbol, TicTacToeBoard
+
+from .board import Symbol, TicTacToeBoard
 
 
 class TicTacToe:

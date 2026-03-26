@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from .tictactoe_accept_view import TicTacToeAcceptView
 from .tictactoe_bot_choose_symbol_view import TicTacToeBotChooseSymbolView
+from .tictactoe_bot_view import Bot_Mode
 from .tictactoe_view import TicTacToeView
 
 logger = logging.getLogger("cogs.tictactoe")
@@ -20,10 +21,12 @@ class TicTacToe(commands.Cog):
         match mode:
             case "solo":
                 await ctx.send(content=f"It is now <@{user}>'s turn", view=TicTacToeView(user, user))
-            case "bot":
-                await ctx.send(content="Choose Symbol You Want To Play", view=TicTacToeBotChooseSymbolView(user))
+            case "bot" | "minimax":
+                await ctx.send(content="Choose Symbol You Want To Play", view=TicTacToeBotChooseSymbolView(user, Bot_Mode.MINIMAX))
             case "random":
-                await ctx.send(content="Choose Symbol You Want To Play", view=TicTacToeBotChooseSymbolView(user, True))
+                await ctx.send(content="Choose Symbol You Want To Play", view=TicTacToeBotChooseSymbolView(user, Bot_Mode.RANDOM))
+            case "mcts" | "nn":
+                await ctx.send(content="Choose Symbol You Want To Play", view=TicTacToeBotChooseSymbolView(user, Bot_Mode.MCTS_NN))
             case _:
                 await ctx.send("TicTacToe Game Started: ", view=TicTacToeAcceptView(user))
 
