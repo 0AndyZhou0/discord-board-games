@@ -85,7 +85,7 @@ class TrainTester:
                 logger.debug(f"Episode {episode}")
                 self.mcts = TicTacToe_MCTS(self.nn, self.c_puct)
                 train_set = self.episode_from_empty(num_searches_per_episode_step)
-                self.train_sets.append(train_set) # TODO: Might be wrong
+                self.train_sets.append(train_set)
 
             
             if len(self.train_sets) > self.train_set_max_len:
@@ -96,7 +96,11 @@ class TrainTester:
             for train_set in self.train_sets:
                 current_train_set.extend(train_set)
             shuffle(current_train_set)
-            # current_train_set = current_train_set[:len(current_train_set) // 10]
+            # Get mini batch
+            if len(current_train_set) > 1024:
+                current_train_set = current_train_set[:1024]
+            else:
+                logger.debug(f"Not enough training data, using {len(current_train_set)}")
 
             # print random samples
             for i in range(10):
