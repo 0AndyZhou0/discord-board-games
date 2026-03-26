@@ -115,11 +115,6 @@ class TrainTester:
             for train_set in self.train_sets:
                 current_train_set.extend(train_set)
             shuffle(current_train_set)
-            # Get mini batch
-            if len(current_train_set) > 1024:
-                current_train_set = current_train_set[:1024]
-            else:
-                logger.debug(f"Not enough training data, using {len(current_train_set)}")
 
             # print random samples
             for i in range(10):
@@ -127,12 +122,12 @@ class TrainTester:
                 logger.debug(current_train_set[i][1])
                 logger.debug(current_train_set[i][2])
 
-
             self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
             self.new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
             self.new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
-            self.new_nn.train(current_train_set, 10, 64)
+
+            self.new_nn.train(current_train_set, 10, 512)
             random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
 
             old_wins, ties, new_wins = Battle.battles(self.nn, self.new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
