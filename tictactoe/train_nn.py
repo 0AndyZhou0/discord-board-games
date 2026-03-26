@@ -35,7 +35,10 @@ if __name__ == "__main__":
     # logger.setLevel(logging.ERROR)
     
     # Training
-    tester.train(num_iters=1000, num_episodes=100, num_searches_per_episode_step=20, num_searches_per_battle=10, num_games_in_battle=100, update_threshold=0.6)
+    tester.train(num_iters=1000, num_episodes=100, \
+                 num_searches_per_episode_step=20, num_searches_per_battle=10, \
+                    num_games_in_battle=100, update_threshold=0.55\
+                    , random_test=True)
 
     # Bot Battle
     # nn0 = TicTacToeNN()

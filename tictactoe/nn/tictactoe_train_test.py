@@ -91,17 +91,18 @@ class TrainTester:
     def load_train_sets(self, path: str = "./train_sets.npy") -> None:
         self.train_sets = np.load(path, allow_pickle=True).tolist()
 
-    def train(self, num_iters: int = 10, num_episodes: int = 1000, num_searches_per_episode_step: int = 20, num_games_in_battle: int = 100, num_searches_per_battle: int = 10, update_threshold: float = 0.5001) -> None:
+    def train(self, num_iters: int = 10, num_episodes: int = 1000, num_searches_per_episode_step: int = 20, num_games_in_battle: int = 100, num_searches_per_battle: int = 10, update_threshold: float = 0.5001, random_test: bool = False) -> None:
         # Battle against random
         best_against_random = 0
-        random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
-        curr_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-        curr_nn.load_model(f"{self.parent_dir_model}/temp.pt")
+        if random_test:
+            random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
+            self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
+            curr_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
+            curr_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
-        wins_against_random, ties_against_random, _ = Battle.battles(curr_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
-        best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
-        logger.debug(f"Preliminary best wins against random: {best_against_random}")
+            wins_against_random, ties_against_random, _ = Battle.battles(curr_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
+            best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
+            logger.debug(f"Preliminary best wins against random: {best_against_random}")
         
         for iter in range(num_iters):
             if iter > 1:
@@ -131,24 +132,25 @@ class TrainTester:
                 logger.debug(current_train_set[i][2])
 
             self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
-            self.new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-            self.new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
+            new_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
+            new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
 
-            self.new_nn.train(current_train_set, 10, 128)
-            random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
-
-            old_wins, ties, new_wins = Battle.battles(self.nn, self.new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
-            wins_against_random, ties_against_random, _ = Battle.battles(self.new_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
-
+            new_nn.train(current_train_set, 10, 64)
+            old_wins, ties, new_wins = Battle.battles(self.nn, new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
             print(f"Old Wins: {old_wins}, Ties: {ties}, New Wins: {new_wins}")
-            print(f"New Wins against random: {wins_against_random}, Ties against random: {ties_against_random}")
 
+            if random_test:
+                random_nn = TicTacToeNNWrapper(TicTacToeNN(), self.nn.device)
+                wins_against_random, ties_against_random, _ = Battle.battles(new_nn, random_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
+                print(f"New Wins against random: {wins_against_random}, Ties against random: {ties_against_random}")
+
+            # if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold):
             if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold)\
-                or (new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle > best_against_random):
+                or (new_wins >= old_wins and (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle >= best_against_random):
                 best_against_random = (wins_against_random + (0.5 * ties_against_random)) / num_games_in_battle
                 logger.debug("Updating best model")
-                self.new_nn.save_model(f"{self.parent_dir_model}/best.pt")
+                new_nn.save_model(f"{self.parent_dir_model}/best.pt")
             else:
                 logger.debug("Not updating best model")
                 self.nn.save_model(f"{self.parent_dir_model}/best.pt")

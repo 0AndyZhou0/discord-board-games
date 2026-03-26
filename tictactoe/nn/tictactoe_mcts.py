@@ -73,7 +73,7 @@ class TicTacToe_MCTS:
                 self.Ps[hashable_board] = policy
             
             self.Ns[hashable_board] = 0
-            return evaluation
+            return -evaluation
         
         # Choose move
         # print("choosing move")
