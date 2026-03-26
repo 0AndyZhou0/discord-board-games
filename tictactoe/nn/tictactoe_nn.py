@@ -22,11 +22,18 @@ class TicTacToeNN(nn.Module):
         input = input.view(-1, 1, 3, 3)
         input = self.conv1(input)
         input = self.bn1(input)
+        input = nn.functional.relu(input)
         input = self.conv2(input)
         input = self.bn2(input)
+        input = nn.functional.relu(input)
         input = self.conv3(input)
         input = self.bn3(input)
+        input = nn.functional.relu(input)
         input = input.view(-1, 64 * 3 * 3)
+
+        # Dropout
+        # input = nn.functional.dropout()
+
         policy: torch.Tensor = self.policy(input)
         evaluation: torch.Tensor = self.evaluation(input)
         return torch.log_softmax(policy, dim=1), torch.tanh(evaluation).view(-1)
