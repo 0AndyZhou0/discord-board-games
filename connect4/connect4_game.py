@@ -57,7 +57,7 @@ class Connect4Game:
     def drop_piece_get_board(board: np.array, col: int, color: Color) -> tuple[np.array, tuple[int, int], Color]:
         """
         Not Inplace
-        
+
         Returns the new board, the row and col of the piece dropped, and the color of the next player
         """
         assert col >= 0 and col < 7, "Invalid Column"
@@ -118,28 +118,30 @@ class Connect4Game:
         # Check Diagonals
         # Top Left to Bottom Right
         count = 0
-        top_left_row, top_left_col = row - min(row, col), col - min(row, col)
-        while top_left_row < 6 and top_left_col < 7:
-            if board[top_left_row][top_left_col] == color:
+        curr_row, curr_col = row - min(row, col), col - min(row, col)
+        while curr_row < 6 and curr_col < 7:
+            if board[curr_row][curr_col] == color:
                 count += 1
             else: 
                 count = 0
             if count == 4:
                 return color
-            top_left_row += 1
-            top_left_col += 1
+            curr_row += 1
+            curr_col += 1
 
         # Bottom Left to Top Right
-        bottom_left_row, bottom_left_col = row + min(Connect4Game.rows - row - 1, col), col - min(Connect4Game.rows - row - 1, col)
-        while bottom_left_row >= 0 and bottom_left_col < 7:
-            if board[bottom_left_row][bottom_left_col] == color:
+        count = 0
+        row_from_bottom = Connect4Game.rows - row - 1
+        curr_row, curr_col = row + min(row_from_bottom, col), col - min(row_from_bottom, col)
+        while curr_row >= 0 and curr_col < 7:
+            if board[curr_row][curr_col] == color:
                 count += 1
             else:
                 count = 0
             if count == 4:
                 return color
-            bottom_left_row -= 1
-            bottom_left_col += 1
+            curr_row -= 1
+            curr_col += 1
 
         # Check for tie
         if board.all():
