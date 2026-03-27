@@ -8,7 +8,6 @@ from .tictactoe_bot_view import Bot_Mode
 from .tictactoe_view import TicTacToeView
 
 logger = logging.getLogger("cogs.tictactoe")
-logger.setLevel(logging.INFO)
 
 class TicTacToe(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
