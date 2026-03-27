@@ -22,7 +22,7 @@ def test_moves() -> None:
     import random
     player = Color.RED
     for _ in range(20):
-        move, player = Connect4Game.drop_piece(board, random.choice(Connect4Game.get_valid_moves(board)), player)
+        move, player = Connect4Game.drop_piece(board, random.choice(Connect4Game.get_valid_cols(board)), player)
         Connect4Game.display_board(board)
         win = Connect4Game.get_game_win(board, *move)
         if win:

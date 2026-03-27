@@ -81,7 +81,7 @@ class Connect4Game:
                 return ((row, col), -color)
         raise Exception("Invalid Move")
     
-    def get_valid_moves(board: np.array) -> list[int]:
+    def get_valid_cols(board: np.array) -> list[int]:
         return [i for i in range(7) if board[0][i] == Color.EMPTY]
     
     def is_column_full(board: np.array, col: int) -> bool:

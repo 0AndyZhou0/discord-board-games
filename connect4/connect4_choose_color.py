@@ -38,7 +38,6 @@ class ChooseColorButton(discord.ui.Button['Connect4ChooseColorView']):
         if user_id == view.player_2_id:
             view.player_2_choice = self.symbol
 
-        print(view.player_1_choice, view.player_2_choice)
         if view.player_1_choice is not None and view.player_2_choice is not None:
             red_player = view.determine_red_player(view.player_1_choice, view.player_2_choice)
             logger.info(f"<@{view.player_1_id}> chose {view.player_1_choice} and <@{view.player_2_id}> chose {view.player_2_choice}. <@{red_player}> goes first")

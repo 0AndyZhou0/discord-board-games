@@ -3,6 +3,8 @@ import logging
 from discord.ext import commands
 
 from .connect4_accept_view import Connect4AcceptView
+from .connect4_bot_choose_color_view import Connect4BotChooseColorView
+from .connect4_bot_view import BotMode
 from .connect4_view import Connect4View
 
 logger = logging.getLogger("cogs.connect4")
@@ -24,7 +26,7 @@ class Connect4(commands.Cog):
             case "bot" | "minimax":
                 raise NotImplementedError
             case "random":
-                raise NotImplementedError
+                await ctx.send(view=Connect4BotChooseColorView(user_id, BotMode.RANDOM))
             case "mcts" | "nn":
                 raise NotImplementedError
             case _:
