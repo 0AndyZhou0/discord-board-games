@@ -7,6 +7,7 @@ import discord
 import numpy as np
 import torch
 
+from .nn.tictactoe import TicTacToe
 from .nn.tictactoe_mcts import TicTacToe_MCTS
 from .nn.tictactoe_nn import TicTacToeNN, TicTacToeNNWrapper
 from .tictactoe_bot import TicTacToeBot
@@ -180,7 +181,8 @@ class TicTacToeBotView(discord.ui.View):
     
     def mcts_nn_move(self) -> tuple[int, int] | None:
         assert self.mcts is not None
-        action = np.argmax(self.mcts.get_best_actions(self.board, 10))
+        canonical_board = TicTacToe.get_canonical_board(self.board, self.bot_symbol)
+        action = np.argmax(self.mcts.get_best_actions(canonical_board, 10))
         x, y = action // 3, action % 3
         self.place_bot_symbol(x, y)
         return (x, y)

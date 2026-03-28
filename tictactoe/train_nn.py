@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # Training
     tester.train(num_iters=1000, num_episodes=100, \
                  num_searches_per_episode_step=20, num_searches_per_battle=10, \
-                    num_games_in_battle=100, update_threshold=0.55\
+                    num_games_in_battle=100, update_threshold=0.5\
                     , random_test=True)
 
     # Bot Battle
