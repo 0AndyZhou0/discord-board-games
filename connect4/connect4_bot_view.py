@@ -82,7 +82,7 @@ class Connect4BotView(discord.ui.LayoutView):
         if bot_mode == BotMode.MCTS_NN:
             path = Path(__file__).parent / "deep_nn" / "models"
             nn = Connect4NNWrapper(num_channels=32)
-            nn.load_model(path / "best{nn.num_channels}.pt")
+            nn.load_model(path / f"best{nn.num_channels}.pt")
             self.mcts = Connect4MCTS(nn)
 
         # Create board
