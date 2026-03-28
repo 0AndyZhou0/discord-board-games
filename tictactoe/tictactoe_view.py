@@ -118,10 +118,17 @@ class TicTacToeView(discord.ui.View):
             return self.player_O
         return None
     
+    def get_loser_id(self) -> int:
+        if self.winner == Symbol.X:
+            return self.player_O
+        if self.winner == Symbol.O:
+            return self.player_X
+        return None
+    
     def get_winner_message(self) -> str:
         if self.winner == Symbol.TIE:
             return f"<@{self.player_X}> and <@{self.player_O}> tied!"
-        return f"<@{self.get_winner_id()}> won!"
+        return f"<@{self.get_winner_id()}> won against <@{self.get_loser_id()}>!"
 
     def random_move(self) -> tuple[int, int] | None:
         empty_squares = []

@@ -32,7 +32,7 @@ class Connect4Button(discord.ui.Button["Connect4View"]):
             if winner == 0:
                 view.text_display.content = f"<@{view.player_red}> and <@{view.player_yellow}> tied!\n{view.emoji_board}"
             else:
-                view.text_display.content = f"The winner is <@{view.get_player_id(winner)}>\n{view.emoji_board}"
+                view.text_display.content = f"<@{view.get_player_id(winner)}> wins against <@{view.get_player_id(-winner)}>\n{view.emoji_board}"
             view.stop_game()
             view.stop()
         await interaction.response.edit_message(view=view)

@@ -56,7 +56,7 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
             if winner == Symbol.TIE:
                 content = f"<@{user_id}> and the bot tied!"
             else:
-                content = f'<@{user_id}> won!'
+                content = f"<@{user_id}> won against the bot!"
 
             view.stop_game()
             view.stop()
@@ -73,7 +73,7 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
             if winner == Symbol.TIE:
                 content = f"<@{user_id}> and the bot tied!"
             else:
-                content = 'The bot won!'
+                content = f"The bot won against <@{user_id}>!"
 
             view.stop_game()
             view.stop()

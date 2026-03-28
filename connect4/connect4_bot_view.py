@@ -42,7 +42,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
             if winner == 0:
                 view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
             else:
-                view.text_display.content = f"The winner is <@{view.player_id}>!\n{view.emoji_board}"
+                view.text_display.content = f"<@{view.player_id}> wins against the bot!\n{view.emoji_board}"
             view.stop_game()
             view.stop()
             await interaction.response.edit_message(view=view)
@@ -59,7 +59,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
             if winner == 0:
                 view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
             else:
-                view.text_display.content = f"The winner is the bot!\n{view.emoji_board}"
+                view.text_display.content = f"The bot wins against <@{view.player_id}>!\n{view.emoji_board}"
             view.stop_game()
             view.stop()
             await interaction.response.edit_message(view=view)
