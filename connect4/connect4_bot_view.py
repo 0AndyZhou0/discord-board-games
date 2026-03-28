@@ -1,11 +1,14 @@
 import logging
 from enum import IntEnum
+from pathlib import Path
 from random import choice
 
 import discord
 import numpy as np
 
 from .connect4_game import Color, Connect4Game
+from .deep_nn.connect4_mcts import Connect4MCTS
+from .deep_nn.connect4_nn import Connect4NNWrapper
 
 logger = logging.getLogger("cogs.connect4")
 
@@ -53,7 +56,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
             if winner == 0:
                 view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
             else:
-                view.text_display.content = f"The winner is the bot!>\n{view.emoji_board}"
+                view.text_display.content = f"The winner is the bot!\n{view.emoji_board}"
             view.stop_game()
             view.stop()
             await interaction.response.edit_message(view=view)
@@ -130,7 +133,6 @@ class Connect4BotView(discord.ui.LayoutView):
                 raise NotImplementedError
                 bot_col = self.minimax_move()
             case BotMode.MCTS_NN:
-                raise NotImplementedError
                 bot_col = self.mcts_nn_move()
             case _:
                 raise Exception("Invalid bot mode")
@@ -139,3 +141,9 @@ class Connect4BotView(discord.ui.LayoutView):
     def random_move(self) -> None:
         valid_cols = Connect4Game.get_valid_cols(self.board)
         return choice(valid_cols)
+
+    def mcts_nn_move(self) -> None:
+        nn = Connect4NNWrapper()
+        nn.load_model(str(Path(__file__).parent) + "/deep_nn/models/best.pt")
+        mcts = Connect4MCTS(nn)
+        return np.argmax(mcts.get_best_actions(self.board, 20))

@@ -28,7 +28,7 @@ class Connect4(commands.Cog):
             case "random":
                 await ctx.send(view=Connect4BotChooseColorView(user_id, BotMode.RANDOM))
             case "mcts" | "nn":
-                raise NotImplementedError
+                await ctx.send(view=Connect4BotChooseColorView(user_id, BotMode.MCTS_NN))
             case _:
                 raise Exception("Not a valid mode")
 
