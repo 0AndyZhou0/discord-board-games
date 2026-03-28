@@ -72,7 +72,7 @@ class TrainTester:
     def train(self, num_iters: int = 1000, num_episodes: int = 100, num_searches_per_episode_step: int = 20, num_games_in_battle: int = 100, num_searches_per_battle: int = 20, update_threshold: float = 0.55) -> None:
         for iter in range(num_iters):
             if iter > 1:
-                self.nn.load_model(f"{self.parent_dir_model}/best.pt")
+                self.nn.load_model(f"{self.parent_dir_model}/best{self.nn.num_channels}.pt")
 
             session_train_set = []
             for episode in range(num_episodes):
@@ -100,11 +100,11 @@ class TrainTester:
                 logger.debug(f"Reward: {current_train_set[i][2]}")
 
             self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
-            new_nn = Connect4NNWrapper()
+            new_nn = Connect4NNWrapper(batch_size=self.nn.batch_size, num_channels=self.nn.num_channels)
             new_nn.load_model(f"{self.parent_dir_model}/temp.pt")
 
 
-            new_nn.train(current_train_set, 10, 64)
+            new_nn.train(current_train_set, 10, self.nn.batch_size)
             old_wins, ties, new_wins = Battle.battles(self.nn, new_nn, c_puct=self.c_puct, \
                                                         num_games=num_games_in_battle, \
                                                         num_searches_per_move=num_searches_per_battle, \
@@ -114,7 +114,7 @@ class TrainTester:
             # if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold):
             if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold):
                 logger.debug("Updating best model")
-                new_nn.save_model(f"{self.parent_dir_model}/best.pt")
+                new_nn.save_model(f"{self.parent_dir_model}/best{self.nn.num_channels}.pt")
             else:
                 logger.debug("Not updating best model")
-                self.nn.save_model(f"{self.parent_dir_model}/best.pt")
+                # self.nn.save_model(f"{self.parent_dir_model}/best{self.nn.num_channels}.pt")

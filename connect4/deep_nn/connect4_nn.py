@@ -63,9 +63,10 @@ class Connect4NN(nn.Module):
         return torch.log_softmax(policy, dim=1), torch.tanh(evaluation).view(-1)
     
 class Connect4NNWrapper:
-    def __init__(self, batch_size: int = 64, rows: int = 6, cols: int = 7) -> None:
-        self.nn = Connect4NN(num_channels=batch_size, rows=rows, cols=cols)
+    def __init__(self, batch_size: int = 64, rows: int = 6, cols: int = 7, num_channels: int = 64) -> None:
+        self.nn = Connect4NN(num_channels=num_channels, rows=rows, cols=cols)
         self.batch_size = batch_size
+        self.num_channels = num_channels
         self.rows, self.cols = rows, cols
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.device.type == "cuda":

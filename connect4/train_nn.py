@@ -13,15 +13,15 @@ logger = logging.getLogger("cogs.connect4.nn")
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    best_nn = Connect4NNWrapper()
+    best_nn = Connect4NNWrapper(batch_size=64, num_channels=32)
     random_nn = Connect4NNWrapper()
     tester = TrainTester(best_nn, random_start_board=True)
 
     logger.setLevel(logging.INFO)
     logger.setLevel(logging.DEBUG)
 
-    if Path.exists(f"{tester.parent_dir_model}/best.pt"):
-        best_nn.load_model(f"{tester.parent_dir_model}/best.pt")
+    if Path.exists(f"{tester.parent_dir_model}/best{best_nn.num_channels}.pt"):
+        best_nn.load_model(f"{tester.parent_dir_model}/best{best_nn.num_channels}.pt")
     
     # Training
     tester.train(num_iters=1000, num_episodes=100, \
@@ -32,19 +32,43 @@ if __name__ == "__main__":
     # nn0wrapper = Connect4NNWrapper()
     # nn1wrapper = Connect4NNWrapper()
     # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
-    # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
-    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 2, 20, True, verbose=True)
+    # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
+    # # print(list(nn1_conv1.named_buffers()))
+    # # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 2, 20, True, verbose=True)
+    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 100, 20, True, verbose=False)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
     # # score = Battle.battle(mcts0, mcts1, 100, True)
     # # print(score)
 
+    # Self Play Game
     # board = Connect4.get_empty_board()
     # mcts = Connect4MCTS(best_nn)
     # player = -1
     # move = (None, None)
     # while Connect4.get_game_win(board, *move) is None:
     #     canonical_board = Connect4.get_canonical_board(board, player)
-    #     probabilities = mcts.get_best_actions(canonical_board, 100)
+    #     probabilities = mcts.do_n_searches(canonical_board, 100)
+    #     print(probabilities)
     #     action = np.argmax(probabilities)
     #     board, move, player = Connect4.drop_piece_get_board(board, action, player)
     #     Connect4.display_board(board)
+
+    # Manual Board
+    # board = np.array([
+    #     [0, 1, 0, 1, 1, 0, 0],
+    #     [0, -1, 0, -1, -1, 0, 0],
+    #     [0, -1, 1, -1, -1, 0, 0],
+    #     [-1, 1, -1, 1, 1, 0, 0],
+    #     [1, 1, 1, -1, -1, 0, 0],
+    #     [1, -1, -1, -1, 1, 0, 0]
+    # ])
+    # player = 1
+    # Connect4.display_board(board)
+    # mcts = Connect4MCTS(best_nn)
+    # move = (None, None)
+    # canonical_board = Connect4.get_canonical_board(board, player)
+    # probabilities = mcts.do_n_searches(canonical_board, 100)
+    # print(probabilities)
+    # action = np.argmax(probabilities)
+    # board, move, player = Connect4.drop_piece_get_board(board, action, player)
+    # Connect4.display_board(board)
