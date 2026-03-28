@@ -28,7 +28,7 @@ class Battle:
             if i % 2 == 0:
                 # Create random board 
                 if random_start_board:
-                        board, player = Connect4.get_random_board(random_position_moves)
+                    board, player = Connect4.get_random_board(random_position_moves)
                 results = Battle.battle(mcts0, mcts1, board, num_searches_per_move, player, verbose)
                 if results == 1:
                     wins_0 += 1
