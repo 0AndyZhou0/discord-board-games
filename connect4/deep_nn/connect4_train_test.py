@@ -94,8 +94,10 @@ class TrainTester:
             shuffle(current_train_set)
 
             # Debug print samples
-            # for i in range(10):
-            #     logger.debug(f"Sample {i}: \n{current_train_set[i]}")
+            for i in range(10):
+                logger.debug(f"Board: \n{Connect4.to_string(current_train_set[i][0])}")
+                logger.debug(f"Probabilities: {current_train_set[i][1]}")
+                logger.debug(f"Reward: {current_train_set[i][2]}")
 
             self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
             new_nn = Connect4NNWrapper()

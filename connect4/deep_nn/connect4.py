@@ -38,6 +38,19 @@ class Connect4:
         """
         return board * player
     
+    def to_string(board: np.array) -> str:
+        string = ""
+        for row in board:
+            for col in row:
+                if col == Color.RED:
+                    string += "R"
+                elif col == Color.YELLOW:
+                    string += "Y"
+                else:
+                    string += "."
+            string += "\n"
+        return string
+    
     def display_board(board: np.array) -> None:
         print("Connect 4 Board")
         for i, row in enumerate(board):
