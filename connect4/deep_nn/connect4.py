@@ -131,7 +131,7 @@ class Connect4:
 
     def get_game_win(board: np.array, row: int, col: int) -> Color | None:
         """
-        returns -1 if red wins, 1 if yellow wins, 0 if tie, None if no win
+        returns -1 if red wins, 1 if yellow wins, 1e-4 if tie, None if no win
         """
         if row is None or col is None:
             return None
@@ -190,6 +190,6 @@ class Connect4:
 
         # Check for tie
         if board.all():
-            return 0
+            return 1e-4
 
         return None

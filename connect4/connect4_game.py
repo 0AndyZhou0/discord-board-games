@@ -89,7 +89,7 @@ class Connect4Game:
 
     def get_game_win(board: np.array, row: int, col: int) -> Color | None:
         """
-        returns -1 if red wins, 1 if yellow wins, 0 if tie
+        returns -1 if red wins, 1 if yellow wins, 1e-4 if tie
         """
         assert board[row][col] in (Color.RED, Color.YELLOW), "Invalid Space Selected To Check For Win"
 
@@ -145,6 +145,6 @@ class Connect4Game:
 
         # Check for tie
         if board.all():
-            return 0
+            return 1e-4
 
         return None
