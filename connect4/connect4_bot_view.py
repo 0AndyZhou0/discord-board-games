@@ -6,7 +6,8 @@ from random import choice
 import discord
 import numpy as np
 
-from .connect4_game import Color, Connect4Game
+# from .connect4_game import Color, Connect4Game
+from .deep_nn.connect4 import Color, Connect4
 from .deep_nn.connect4_mcts import Connect4MCTS
 from .deep_nn.connect4_nn import Connect4NNWrapper
 
@@ -83,8 +84,8 @@ class Connect4BotView(discord.ui.LayoutView):
             self.mcts = Connect4MCTS(nn)
 
         # Create board
-        self.board: np.array = Connect4Game.get_empty_board()
-        self.emoji_board: str = Connect4Game.get_emoji_board(self.board)
+        self.board: np.array = Connect4.get_empty_board()
+        self.emoji_board: str = Connect4.get_emoji_board(self.board)
 
         # Create text display
         self.text_display = discord.ui.TextDisplay(f"It is <@{self.player_id}>'s turn\n{self.emoji_board}")
@@ -108,22 +109,22 @@ class Connect4BotView(discord.ui.LayoutView):
     def drop_piece(self, col: int) -> tuple[int, int]:
         match self.current_player:
             case Color.RED:
-                move, next_player = Connect4Game.drop_piece(self.board, col, self.current_player)
+                move, next_player = Connect4.drop_piece(self.board, col, self.current_player)
                 self.current_player = Color.YELLOW
             case Color.YELLOW:
-                move, next_player = Connect4Game.drop_piece(self.board, col, self.current_player)
+                move, next_player = Connect4.drop_piece(self.board, col, self.current_player)
                 self.current_player = Color.RED
             case _:
                 raise Exception("Invalid Player")
-        self.emoji_board = Connect4Game.get_emoji_board(self.board)
+        self.emoji_board = Connect4.get_emoji_board(self.board)
         self.text_display.content = f"It is <@{self.player_id}>'s turn\n{self.emoji_board}"
         return move
     
     def is_column_full(self, col: int) -> bool:
-        return Connect4Game.is_column_full(self.board, col)
+        return Connect4.is_column_full(self.board, col)
     
     def check_for_win(self, row: int, col: int) -> Color | None:
-        return Connect4Game.get_game_win(self.board, row, col)
+        return Connect4.get_game_win(self.board, row, col)
     
     def stop_game(self) -> None:
         for button in self.action_row.children:
@@ -145,8 +146,9 @@ class Connect4BotView(discord.ui.LayoutView):
         return self.drop_piece(bot_col)
             
     def random_move(self) -> None:
-        valid_cols = Connect4Game.get_valid_cols(self.board)
+        valid_cols = Connect4.get_valid_cols(self.board)
         return choice(valid_cols)
 
     def mcts_nn_move(self) -> None:
-        return np.argmax(self.mcts.get_best_actions(self.board, 20))
+        canonical_board = Connect4.get_canonical_board(self.board, self.current_player)
+        return np.argmax(self.mcts.get_best_actions(canonical_board, 20))
