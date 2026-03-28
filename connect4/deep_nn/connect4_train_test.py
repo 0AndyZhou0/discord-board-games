@@ -72,12 +72,14 @@ class TrainTester:
             if iter > 1:
                 self.nn.load_model(f"{self.parent_dir_model}/best.pt")
 
+            session_train_set = []
             for episode in range(num_episodes):
                 logger.debug(f"Episode {episode}")
                 self.mcts = Connect4MCTS(self.nn, self.outputs, self.c_puct)
                 train_set = self.episode(num_searches_per_episode_step)
-                self.train_sets.append(train_set)
+                session_train_set.extend(train_set)
 
+            self.train_sets.append(session_train_set)
             
             if len(self.train_sets) > self.train_set_max_len:
                 self.train_sets = self.train_sets[1:]
