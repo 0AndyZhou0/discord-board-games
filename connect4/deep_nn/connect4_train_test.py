@@ -13,10 +13,12 @@ logging.basicConfig()
 logger = logging.getLogger("cogs.connect4.nn")
 
 class TrainTester:
-    def __init__(self, nn: Connect4NNWrapper, outputs: int = 7, c_puct: float = 1) -> None:
+    def __init__(self, nn: Connect4NNWrapper, outputs: int = 7, c_puct: float = 1, random_start_board: bool = False) -> None:
         self.nn = nn
         self.outputs = outputs
         self.c_puct = c_puct
+        self.random_start_board = random_start_board
+
         self.mcts = Connect4MCTS(self.nn, outputs, c_puct)
         self.parent_dir = Path(__file__).parent
         self.parent_dir_model = str(self.parent_dir) + "/models"
@@ -30,13 +32,13 @@ class TrainTester:
 
         self.train_set_max_len = 10
 
-    def episode(self, num_searches_per_episode_step: int = 100):  # noqa: ANN201
+    def episode(self, num_searches_per_episode_step: int = 100, random_start_board: bool = False, random_position_moves: int = 10):  # noqa: ANN201
         tempTrainSet = []
         board = Connect4.get_empty_board()
         player = -1
 
-        # TODO: Create random board weighted by number of moves
-        board, player = Connect4.get_random_board(10)
+        if random_start_board:
+            board, player = Connect4.get_random_board(random_position_moves)
 
         curr_player = player
         episodeStep = 0
@@ -76,7 +78,7 @@ class TrainTester:
             for episode in range(num_episodes):
                 logger.debug(f"Episode {episode}")
                 self.mcts = Connect4MCTS(self.nn, self.outputs, self.c_puct)
-                train_set = self.episode(num_searches_per_episode_step)
+                train_set = self.episode(num_searches_per_episode_step, self.random_start_board)
                 session_train_set.extend(train_set)
 
             self.train_sets.append(session_train_set)
@@ -101,7 +103,10 @@ class TrainTester:
 
 
             new_nn.train(current_train_set, 10, 64)
-            old_wins, ties, new_wins = Battle.battles(self.nn, new_nn, self.c_puct, num_games_in_battle, num_searches_per_battle)
+            old_wins, ties, new_wins = Battle.battles(self.nn, new_nn, c_puct=self.c_puct, \
+                                                        num_games=num_games_in_battle, \
+                                                        num_searches_per_move=num_searches_per_battle, \
+                                                        random_start_board=self.random_start_board)
             print(f"Old Wins: {old_wins}, Ties: {ties}, New Wins: {new_wins}")
 
             # if ((new_wins + (0.5 * ties)) / num_games_in_battle >= update_threshold):

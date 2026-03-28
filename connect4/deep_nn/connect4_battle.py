@@ -9,7 +9,7 @@ from .connect4_nn import Connect4NNWrapper
 logger = logging.getLogger("cogs.connect4.nn.battle")
 
 class Battle:
-    def battles(nn0: Connect4NNWrapper, nn1: Connect4NNWrapper, c_puct: float = 1, num_games: int = 100, num_searches_per_move: int = 20, verbose: bool = False) -> tuple[int, int, int]:
+    def battles(nn0: Connect4NNWrapper, nn1: Connect4NNWrapper, c_puct: float = 1, num_games: int = 100, num_searches_per_move: int = 20, random_start_board: bool = False, random_position_moves: int = 10, verbose: bool = False) -> tuple[int, int, int]:
         """
         Returns:
             (nn0 wins, ties, nn1 wins)
@@ -20,14 +20,16 @@ class Battle:
         wins_1 = 0
         wins_red = 0
         wins_yellow = 0
+        board = Connect4.get_empty_board()
         for i in range(num_games):
             # Reset mcts for each game
             mcts0 = Connect4MCTS(nn0)
             mcts1 = Connect4MCTS(nn1)
             if i % 2 == 0:
                 # Create random board 
-                board, player = Connect4.get_random_board(10) 
-                results = Battle.battle(mcts0, mcts1, board, num_searches_per_move, verbose)
+                if random_start_board:
+                        board, player = Connect4.get_random_board(random_position_moves)
+                results = Battle.battle(mcts0, mcts1, board, num_searches_per_move, player, verbose)
                 if results == 1:
                     wins_0 += 1
                     wins_red += 1
@@ -37,7 +39,7 @@ class Battle:
                 else:
                     ties += 1
             else:
-                results = Battle.battle(mcts1, mcts0, board, num_searches_per_move, verbose)
+                results = Battle.battle(mcts1, mcts0, board, num_searches_per_move, player, verbose)
                 if results == 1:
                     wins_1 += 1
                     wins_red += 1
@@ -50,7 +52,7 @@ class Battle:
         logger.debug(f"red wins: {wins_red}, yellow wins: {wins_yellow}, ties: {ties}")
         return wins_0, ties, wins_1
 
-    def battle(mcts0: Connect4MCTS, mcts1: Connect4MCTS, board: np.array = None, num_searches_per_move: int = 20, verbose: bool = False) -> tuple[int, int, int]:
+    def battle(mcts0: Connect4MCTS, mcts1: Connect4MCTS, board: np.array = None, num_searches_per_move: int = 20, player_turn: int = -1, verbose: bool = False) -> tuple[int, int, int]:
         """
         Returns:
             1 if first player wins, 0 for tie, -1 if second player wins
@@ -58,7 +60,7 @@ class Battle:
         if board is None:
             board = Connect4.get_empty_board()
         previous_move = (None, None)
-        curr_player = -1
+        curr_player = player_turn
         turn = 0
 
         while Connect4.get_game_win(board, *previous_move) is None:
