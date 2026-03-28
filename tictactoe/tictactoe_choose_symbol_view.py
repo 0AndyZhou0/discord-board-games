@@ -29,13 +29,14 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeChooseSymbolView']):
             await interaction.response.send_message(content="You are not in the game", ephemeral=True)
             return
         
+        await interaction.response.defer(ephemeral=True)
+        
         if view.player_1_choice is not None and view.player_2_choice is not None:
             X_player = view.determine_X_player(view.player_1_choice, view.player_2_choice)
             logger.info(f"<@{view.player_1}> chose {view.player_1_choice} and <@{view.player_2}> chose {view.player_2_choice}. <@{X_player}> goes first")
             O_player = view.player_1 if X_player == view.player_2 else view.player_2
             view.stop()
-            await interaction.response.edit_message(content=f"It is now <@{X_player}>'s turn", view=TicTacToeView(X_player, O_player))
-            # I'm pretty sure this throws an error when both players choose at the same time
+            await interaction.followup.edit_message(message_id=interaction.message.id, content=f"It is now <@{X_player}>'s turn", view=TicTacToeView(X_player, O_player))
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         logger.error(error)
