@@ -30,21 +30,13 @@ class TrainTester:
 
         self.train_set_max_len = 10
 
-    def episode_from_empty(self, num_searches_per_episode_step: int = 100):  # noqa: ANN201
+    def episode(self, num_searches_per_episode_step: int = 100):  # noqa: ANN201
         tempTrainSet = []
         board = Connect4.get_empty_board()
         player = -1
 
         # TODO: Create random board weighted by number of moves
-        n = 15
-        reverse_prob = [i / sum(range(n, -1, -1)) for i in range(n, -1, -1)]
-        for i in range(self.random.choice(n + 1, p=reverse_prob)):
-            action = self.random.choice(7, p=Connect4.get_valid_cols_mask(board)/sum(Connect4.get_valid_cols_mask(board)))
-            next_board, move, next_player = Connect4.drop_piece_get_board(board, action, player)
-            if Connect4.get_game_win(next_board, *move) is not None:
-                break
-            board = next_board
-            player = next_player
+        board, player = Connect4.get_random_board(10)
 
         curr_player = player
         episodeStep = 0
@@ -83,7 +75,7 @@ class TrainTester:
             for episode in range(num_episodes):
                 logger.debug(f"Episode {episode}")
                 self.mcts = Connect4MCTS(self.nn, self.outputs, self.c_puct)
-                train_set = self.episode_from_empty(num_searches_per_episode_step)
+                train_set = self.episode(num_searches_per_episode_step)
                 self.train_sets.append(train_set)
 
             
@@ -96,6 +88,10 @@ class TrainTester:
             for train_set in self.train_sets:
                 current_train_set.extend(train_set)
             shuffle(current_train_set)
+
+            # Debug print samples
+            # for i in range(10):
+            #     logger.debug(f"Sample {i}: \n{current_train_set[i]}")
 
             self.nn.save_model(f"{self.parent_dir_model}/temp.pt")
             new_nn = Connect4NNWrapper()

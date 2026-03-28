@@ -16,6 +16,22 @@ class Connect4:
     def get_empty_board() -> np.array:
         return np.zeros(shape=(6,7))
     
+    def get_random_board(max_moves: int) -> tuple[np.array, Color]:
+        board = Connect4.get_empty_board()
+        player = Color.RED
+        move = (None, None)
+        random = np.random.default_rng()
+        reverse_prob = [i / sum(range(max_moves, -1, -1)) for i in range(max_moves, -1, -1)]
+        for i in range(random.choice(max_moves + 1, p=reverse_prob)):
+            action = random.choice(7, p=Connect4.get_valid_cols_mask(board)/sum(Connect4.get_valid_cols_mask(board)))
+            next_board, move, next_player = Connect4.drop_piece_get_board(board, action, player)
+            if Connect4.get_game_win(next_board, *move) is not None:
+                break
+            board = next_board
+            player = next_player
+
+        return board, player
+
     def get_canonical_board(board: np.array, player: Color) -> np.array:
         """
         Board in perspective of YELLOW(1) player. YELLOW turn.

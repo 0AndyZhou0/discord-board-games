@@ -14,6 +14,7 @@ class Battle:
         Returns:
             (nn0 wins, ties, nn1 wins)
         """
+        assert num_games % 2 == 0
         wins_0 = 0
         ties = 0
         wins_1 = 0
@@ -24,7 +25,9 @@ class Battle:
             mcts0 = Connect4MCTS(nn0)
             mcts1 = Connect4MCTS(nn1)
             if i % 2 == 0:
-                results = Battle.battle(mcts0, mcts1, num_searches_per_move, verbose)
+                # Create random board 
+                board, player = Connect4.get_random_board(10) 
+                results = Battle.battle(mcts0, mcts1, board, num_searches_per_move, verbose)
                 if results == 1:
                     wins_0 += 1
                     wins_red += 1
@@ -34,7 +37,7 @@ class Battle:
                 else:
                     ties += 1
             else:
-                results = Battle.battle(mcts1, mcts0, num_searches_per_move, verbose)
+                results = Battle.battle(mcts1, mcts0, board, num_searches_per_move, verbose)
                 if results == 1:
                     wins_1 += 1
                     wins_red += 1
@@ -47,12 +50,13 @@ class Battle:
         logger.debug(f"red wins: {wins_red}, yellow wins: {wins_yellow}, ties: {ties}")
         return wins_0, ties, wins_1
 
-    def battle(mcts0: Connect4MCTS, mcts1: Connect4MCTS, num_searches_per_move: int = 20, verbose: bool = False) -> tuple[int, int, int]:
+    def battle(mcts0: Connect4MCTS, mcts1: Connect4MCTS, board: np.array = None, num_searches_per_move: int = 20, verbose: bool = False) -> tuple[int, int, int]:
         """
         Returns:
             1 if first player wins, 0 for tie, -1 if second player wins
         """
-        board = Connect4.get_empty_board()
+        if board is None:
+            board = Connect4.get_empty_board()
         previous_move = (None, None)
         curr_player = -1
         turn = 0
@@ -60,7 +64,7 @@ class Battle:
         while Connect4.get_game_win(board, *previous_move) is None:
             turn += 1
             if verbose:
-                # TODO: Print board
+                Connect4.display_board(board)
                 logger.debug(f"Turn {turn}")
             
             canonical_board = Connect4.get_canonical_board(board, curr_player)
@@ -75,7 +79,7 @@ class Battle:
             board, previous_move, curr_player = next_board, move, next_player
         
         if verbose:
-            pass
-            # TODO: Print board
+            Connect4.display_board(board)
+            logger.debug(f"Winner: {Connect4.get_game_win(board, *previous_move)}")
 
         return -Connect4.get_game_win(board, *previous_move)
