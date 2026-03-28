@@ -62,7 +62,7 @@ class Connect4MCTS:
                 policy = policy / sum_policy
                 self.Ps[hashable_board] = policy
             else:
-                logger.error("policy sum is 0")
+                logger.error("All moves are equal, policy sum is 0")
                 policy = policy + valid_cols
                 policy = policy / np.sum(policy)
                 self.Ps[hashable_board] = policy
