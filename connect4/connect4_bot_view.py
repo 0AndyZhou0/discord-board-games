@@ -76,6 +76,12 @@ class Connect4BotView(discord.ui.LayoutView):
         self.player_color = player_color
         self.bot_mode = bot_mode
 
+        if bot_mode == BotMode.MCTS_NN:
+            path = Path(__file__).parent / "deep_nn" / "models"
+            nn = Connect4NNWrapper()
+            nn.load_model(path / "best.pt")
+            self.mcts = Connect4MCTS(nn)
+
         # Create board
         self.board: np.array = Connect4Game.get_empty_board()
         self.emoji_board: str = Connect4Game.get_emoji_board(self.board)
@@ -143,7 +149,4 @@ class Connect4BotView(discord.ui.LayoutView):
         return choice(valid_cols)
 
     def mcts_nn_move(self) -> None:
-        nn = Connect4NNWrapper()
-        nn.load_model(str(Path(__file__).parent) + "/deep_nn/models/best.pt")
-        mcts = Connect4MCTS(nn)
-        return np.argmax(mcts.get_best_actions(self.board, 20))
+        return np.argmax(self.mcts.get_best_actions(self.board, 20))
