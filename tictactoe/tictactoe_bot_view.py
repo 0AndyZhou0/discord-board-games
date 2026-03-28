@@ -52,7 +52,7 @@ class TicTacToeButton(discord.ui.Button['TicTacToeBotView']):
             view.place_symbol(self.x, self.y, Symbol.O)
 
         winner = view.winner
-        if winner is not None: # TODO: Maybe save board positions and results for training?
+        if winner is not None:
             if winner == Symbol.TIE:
                 content = f"<@{user_id}> and the bot tied!"
             else:
