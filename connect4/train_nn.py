@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # nn1wrapper = Connect4NNWrapper()
     # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
     # # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
-    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 10, 20, True)
+    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 2, 20, True, verbose=True)
     # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
     # # score = Battle.battle(mcts0, mcts1, 100, True)
     # # print(score)
