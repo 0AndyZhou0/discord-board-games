@@ -51,7 +51,9 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
         # Bot Move
         move = view.bot_move()
         if view.is_column_full(move[1]):
-            self.disabled = True
+            for button in view.action_row.children + view.action_row2.children:
+                if button.col == move[1]:
+                    button.disabled = True
         winner = view.check_for_win(*move)
         if winner is not None:
             if winner == 0:
