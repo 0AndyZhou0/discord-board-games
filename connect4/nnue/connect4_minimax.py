@@ -42,6 +42,11 @@ class Connect4Minimax:
                 Connect4Minimax.total_terminal_time += time.time() - start_time
                 return -1
             Connect4Minimax.total_terminal_time += time.time() - start_time
+            value = game.nnue_wrapper.accumulator_forward(player)
+            if value > 0.8 or value < -0.8:
+                game.print_bitboard()
+                print("player: ", player)
+                print("value of board: ", game.nnue_wrapper.accumulator_forward(player))
             return -game.nnue_wrapper.accumulator_forward(player) * player
             
         # TODO: Implement check for fastest win and prune
@@ -80,11 +85,3 @@ class Connect4Minimax:
                 best_col = col
         assert best_col is not None
         return best_col
-    
-    def get_best_col_from_board(board: np.array, player: Color) -> int:
-        game = Connect4Game()
-        red_bitboard, yellow_bitboard = game.to_bitboards(board)
-        game.red_bitboard = red_bitboard
-        game.yellow_bitboard = yellow_bitboard
-        game.player = player
-        return Connect4Minimax.get_best_col(game, player)

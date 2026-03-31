@@ -11,7 +11,7 @@ from .deep_nn.connect4 import Color, Connect4
 from .deep_nn.connect4_mcts import Connect4MCTS
 from .deep_nn.connect4_nn import Connect4NNWrapper
 
-from .nnue.connect4_minimax import Connect4Minimax
+from .nnue.connect4_translator import Connect4Translator
 
 logger = logging.getLogger("cogs.connect4")
 
@@ -87,6 +87,9 @@ class Connect4BotView(discord.ui.LayoutView):
             nn.load_model(path / f"best{nn.num_channels}.pt")
             self.mcts = Connect4MCTS(nn)
 
+        if bot_mode == BotMode.MINIMAX:
+            self.translator = Connect4Translator()
+
         # Create board
         self.board: np.array = Connect4.get_empty_board()
         self.emoji_board: str = Connect4.get_emoji_board(self.board)
@@ -157,4 +160,4 @@ class Connect4BotView(discord.ui.LayoutView):
         return np.argmax(self.mcts.get_best_actions(canonical_board, 20))
     
     def minimax_move(self) -> int:
-        return Connect4Minimax.get_best_col_from_board(self.board, self.current_player)
+        return self.translator.get_best_col_from_board(self.board, self.current_player)

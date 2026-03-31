@@ -32,11 +32,9 @@ class Connect4NNUEWrapper:
             return evaluation.data.cpu().numpy()[0]
         
     def accumulator_add(self, row: int, col: int, player: int) -> None:
-        self.nn.eval()
         self.nn.accumulator_add(row, col, player)
 
     def accumulator_remove(self, row: int, col: int, player: int) -> None:
-        self.nn.eval()
         self.nn.accumulator_remove(row, col, player)
     
     def accumulator_forward(self, player: int) -> torch.Tensor:
