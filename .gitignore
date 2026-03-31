@@ -1,6 +1,8 @@
 # nn
 temp.pt
 train_sets*.npy
+best*.pt
+*.npy
 
 
 # Byte-compiled / optimized / DLL files
