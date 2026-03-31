@@ -26,6 +26,8 @@ class Connect4NNUEWrapper:
             red_bitboard = red_bitboard.contiguous().cuda()
             yellow_bitboard = yellow_bitboard.contiguous().cuda()
             player = torch.tensor(player, dtype=torch.long).unsqueeze(0).cuda()
+        else:
+            player = torch.tensor(player, dtype=torch.long).unsqueeze(0)
         self.nn.eval()
         with torch.no_grad():
             evaluation = self.nn(red_bitboard, yellow_bitboard, player)
