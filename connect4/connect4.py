@@ -24,7 +24,7 @@ class Connect4(commands.Cog):
             case "solo":
                 await ctx.send(view=Connect4View(user_id, user_id))
             case "bot" | "minimax":
-                raise NotImplementedError
+                await ctx.send(view=Connect4BotChooseColorView(user_id, BotMode.MINIMAX))
             case "random":
                 await ctx.send(view=Connect4BotChooseColorView(user_id, BotMode.RANDOM))
             case "mcts" | "nn":

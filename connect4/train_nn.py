@@ -24,21 +24,16 @@ if __name__ == "__main__":
         best_nn.load_model(f"{tester.parent_dir_model}/best{best_nn.num_channels}.pt")
     
     # Training
-    tester.train(num_iters=1000, num_episodes=100, \
-                 num_searches_per_episode_step=20, num_searches_per_battle=10, \
-                    num_games_in_battle=100, update_threshold=0.55)
+    # tester.train(num_iters=1000, num_episodes=100, \
+    #              num_searches_per_episode_step=20, num_searches_per_battle=10, \
+    #                 num_games_in_battle=100, update_threshold=0.55)
 
     # Bot Battle
-    # nn0wrapper = Connect4NNWrapper()
-    # nn1wrapper = Connect4NNWrapper()
-    # nn0wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
-    # nn1wrapper.load_model(f"{tester.parent_dir_model}/best.pt")
-    # # print(list(nn1_conv1.named_buffers()))
-    # # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 2, 20, True, verbose=True)
-    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 100, 20, True, verbose=False)
-    # print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
-    # # score = Battle.battle(mcts0, mcts1, 100, True)
-    # # print(score)
+    nn0wrapper = Connect4NNWrapper(num_channels=32)
+    nn1wrapper = Connect4NNWrapper(num_channels=32)
+    # mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 2, 20, True, verbose=True)
+    mcts0_score, mcts0_ties, mcts1_score = Battle.battles(nn0wrapper, nn1wrapper, 1, 100, 20, True, verbose=False)
+    print(f"mcts0 wins: {mcts0_score}, ties: {mcts0_ties}, mcts1 wins: {mcts1_score}")
 
     # Self Play Game
     # board = Connect4.get_empty_board()

@@ -11,6 +11,8 @@ from .deep_nn.connect4 import Color, Connect4
 from .deep_nn.connect4_mcts import Connect4MCTS
 from .deep_nn.connect4_nn import Connect4NNWrapper
 
+from .nnue.connect4_minimax import Connect4Minimax
+
 logger = logging.getLogger("cogs.connect4")
 
 
@@ -139,7 +141,6 @@ class Connect4BotView(discord.ui.LayoutView):
             case BotMode.RANDOM:
                 bot_col = self.random_move()
             case BotMode.MINIMAX:
-                raise NotImplementedError
                 bot_col = self.minimax_move()
             case BotMode.MCTS_NN:
                 bot_col = self.mcts_nn_move()
@@ -147,10 +148,13 @@ class Connect4BotView(discord.ui.LayoutView):
                 raise Exception("Invalid bot mode")
         return self.drop_piece(bot_col)
             
-    def random_move(self) -> None:
+    def random_move(self) -> int:
         valid_cols = Connect4.get_valid_cols(self.board)
         return choice(valid_cols)
 
-    def mcts_nn_move(self) -> None:
+    def mcts_nn_move(self) -> int:
         canonical_board = Connect4.get_canonical_board(self.board, self.current_player)
         return np.argmax(self.mcts.get_best_actions(canonical_board, 20))
+    
+    def minimax_move(self) -> int:
+        return Connect4Minimax.get_best_col_from_board(self.board, self.current_player)

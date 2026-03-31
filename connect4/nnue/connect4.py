@@ -1,13 +1,7 @@
-from enum import IntEnum
-
 import numpy as np
 
+from .connect4_color import Color
 
-class Color(IntEnum):
-    RED = -1
-    EMPTY = 0
-    YELLOW = 1
-    RANDOM = 2
 
 class Connect4:
     rows = 6
