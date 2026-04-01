@@ -1,6 +1,9 @@
+from pathlib import Path
 import time
 
 import numpy as np
+
+from .external_functions import get_eval
 
 from .connect4 import Connect4
 from .connect4_color import Color
@@ -40,14 +43,10 @@ class Connect4Minimax:
             start_time = time.time()
             if winner is not None:
                 Connect4Minimax.total_terminal_time += time.time() - start_time
-                return -100
+                return -10000-depth
             Connect4Minimax.total_terminal_time += time.time() - start_time
-            value = game.nnue_wrapper.accumulator_forward(player)
-            if value > 0.8 or value < -0.8:
-                game.print_bitboard()
-                print("player: ", player)
-                print("value of board: ", game.nnue_wrapper.accumulator_forward(player))
-            return -game.nnue_wrapper.accumulator_forward(player)
+            # return get_eval(game.moves)
+            return game.nnue_wrapper.accumulator_forward(player)
             
         # TODO: Implement check for fastest win and prune
 
@@ -79,7 +78,7 @@ class Connect4Minimax:
                 continue
             row, col = game.drop_piece_with_color(col, player)
             # value = -Connect4Minimax.minimax(game, -player, 0)
-            value = -Connect4Minimax.minimax(game, -player, 0)
+            value = -Connect4Minimax.minimax(game, -player, 3)
             game.remove_piece(row, col, player)
             if value > best_value:
                 best_value = value

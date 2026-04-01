@@ -77,7 +77,7 @@ class Connect4NNUEWrapper:
                 
                 evaluation = self.nn(red_bitboards, yellow_bitboards, players)
 
-                evaluation_loss = criterion(train_eval, evaluation)
+                evaluation_loss = criterion(train_eval.view(-1), evaluation)
 
                 optimizer.zero_grad()
                 evaluation_loss.backward()

@@ -80,6 +80,7 @@ class Connect4BotView(discord.ui.LayoutView):
         self.player_id = player_id
         self.player_color = player_color
         self.bot_mode = bot_mode
+        self.moves = ""
 
         if bot_mode == BotMode.MCTS_NN:
             path = Path(__file__).parent / "deep_nn" / "models"
@@ -125,6 +126,7 @@ class Connect4BotView(discord.ui.LayoutView):
                 raise Exception("Invalid Player")
         self.emoji_board = Connect4.get_emoji_board(self.board)
         self.text_display.content = f"It is <@{self.player_id}>'s turn\n{self.emoji_board}"
+        self.moves += str(col + 1)
         return move
     
     def is_column_full(self, col: int) -> bool:
@@ -160,4 +162,5 @@ class Connect4BotView(discord.ui.LayoutView):
         return np.argmax(self.mcts.get_best_actions(canonical_board, 20))
     
     def minimax_move(self) -> int:
+        # return self.translator.get_best_col_from_board(self.board, self.current_player, self.moves)
         return self.translator.get_best_col_from_board(self.board, self.current_player)
