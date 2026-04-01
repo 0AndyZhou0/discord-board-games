@@ -40,14 +40,14 @@ class Connect4Minimax:
             start_time = time.time()
             if winner is not None:
                 Connect4Minimax.total_terminal_time += time.time() - start_time
-                return -1
+                return -100
             Connect4Minimax.total_terminal_time += time.time() - start_time
             value = game.nnue_wrapper.accumulator_forward(player)
             if value > 0.8 or value < -0.8:
                 game.print_bitboard()
                 print("player: ", player)
                 print("value of board: ", game.nnue_wrapper.accumulator_forward(player))
-            return -game.nnue_wrapper.accumulator_forward(player) * player
+            return -game.nnue_wrapper.accumulator_forward(player)
             
         # TODO: Implement check for fastest win and prune
 
@@ -58,7 +58,7 @@ class Connect4Minimax:
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
-            row, col = game.drop_piece(col, player)
+            row, col = game.drop_piece_with_color(col, player)
             Connect4Minimax.total_non_terminal_time += time.time() - start_time
             value = -Connect4Minimax.minimax(game, -player, depth - 1, -beta, -alpha)
             start_time = time.time()
@@ -77,8 +77,9 @@ class Connect4Minimax:
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
-            row, col = game.drop_piece(col, player)
-            value = -Connect4Minimax.minimax(game, -player, 3)
+            row, col = game.drop_piece_with_color(col, player)
+            # value = -Connect4Minimax.minimax(game, -player, 0)
+            value = -Connect4Minimax.minimax(game, -player, 0)
             game.remove_piece(row, col, player)
             if value > best_value:
                 best_value = value

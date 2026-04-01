@@ -12,16 +12,18 @@ logger = logging.getLogger("cogs.connect4.nnue")
 
 class Connect4Game:
     def __init__(self) -> None:
-        self.player = Color.RED
+        self.player: Color = Color.RED
+        self.moves: str = ""
         self.red_bitboard: np.longlong = np.longlong(0)
         self.yellow_bitboard: np.longlong = np.longlong(0)
+
         """
-        bitboard layout:
-        0  1  2  3  4  5  6
-        7  8  9  10 11 12 13
-        14 15 16 17 18 19 20
-        21 22 23 24 25 26 27
-        28 29 30 31 32 33 34
+        bitboard layout:\n
+        0  1  2  3  4  5  6\n
+        7  8  9  10 11 12 13\n
+        14 15 16 17 18 19 20\n
+        21 22 23 24 25 26 27\n
+        28 29 30 31 32 33 34\n
         35 36 37 38 39 40 41
         """
         # self.features = np.zeros(Connect4.rows * Connect4.cols * 2) # idx(r, c, player) = (rows*cols)*player + rows*c + r
@@ -66,8 +68,15 @@ class Connect4Game:
             if not self.is_column_full(col):
                 valid_cols.append(col)
         return valid_cols
+    
+    def get_valid_cols_mask(self) -> np.array:
+        valid_cols = np.zeros(Connect4.cols)
+        for col in range(Connect4.cols):
+            if not self.is_column_full(col):
+                valid_cols[col] = 1
+        return valid_cols
 
-    def drop_piece(self, col: int, player: Color) -> tuple[int, int]:
+    def drop_piece_with_color(self, col: int, player: Color) -> tuple[int, int]:
         r = None
         c = col
         for row in range(Connect4.rows - 1, -1, -1):
@@ -84,6 +93,29 @@ class Connect4Game:
                 self.yellow_bitboard |= 1 << (r * Connect4.cols + c)
         # Update NNUE
         self.add_feature(r, c, player)
+        self.player *= -1
+        self.moves += str(col+1)
+        return r, c
+    
+    def drop_piece(self, col: int) -> tuple[int, int]:
+        r = None
+        c = col
+        for row in range(Connect4.rows - 1, -1, -1):
+            if not self.red_bitboard & (1 << (row * Connect4.cols + col)) and not self.yellow_bitboard & (1 << (row * Connect4.cols + col)):
+                r = row
+                break
+        if r is None:
+            logger.error(f"Column {col} is full")
+            raise Exception("Column is full")
+        match self.player:
+            case Color.RED:
+                self.red_bitboard |= 1 << (r * Connect4.cols + c)
+            case Color.YELLOW:
+                self.yellow_bitboard |= 1 << (r * Connect4.cols + c)
+        # Update NNUE
+        self.add_feature(r, c, self.player)
+        self.player *= -1
+        self.moves += str(col+1)
         return r, c
     
     def remove_piece(self, row: int, col: int, player: Color) -> None:
@@ -94,6 +126,7 @@ class Connect4Game:
                 self.yellow_bitboard &= ~(1 << (row * Connect4.cols + col))
         # Update NNUE
         self.remove_feature(row, col, player)
+        self.moves = self.moves[:-1]
 
     def add_feature(self, row: int, col: int, player: int) -> None:
         """sets the feature for the given row, col, player"""

@@ -16,6 +16,14 @@ class Connect4Translator:
         model_path = self.path_dir / "models" / "best.pt"
         self.game.load_model(model_path)
 
+    # def get_best_col_from_board(self, board: np.array, player: Color) -> int:
+    #     game = self.game
+    #     red_bitboard, yellow_bitboard = game.to_bitboards(board)
+    #     game.red_bitboard = red_bitboard
+    #     game.yellow_bitboard = yellow_bitboard
+    #     game.player = player
+    #     best_col = Connect4Minimax.get_best_col(game, player)
+    #     return best_col
     def get_best_col_from_board(self, board: np.array, player: Color) -> int:
         game = self.game
         red_bitboard, yellow_bitboard = game.to_bitboards(board)

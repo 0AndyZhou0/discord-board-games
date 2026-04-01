@@ -46,26 +46,28 @@ class Connect4NNUEWrapper:
             # print(result)
             return self.nn.accumulator_forward(player).data.cpu().numpy()[0]
 
-    def train(self, train_set: list[tuple[torch.Tensor, torch.Tensor]], epochs: int = 10, batch_size: int = 128, optimizer: torch.optim.Optimizer = None, criterion: torch.nn.Module = None) -> None:
+    def train(self, train_set: tuple[torch.LongTensor], epochs: int = 10, batch_size: int = 128, optimizer: torch.optim.Optimizer = None, criterion: torch.nn.Module = None) -> None:
         if optimizer is None:
             optimizer = torch.optim.Adam(self.nn.parameters())
         if criterion is None:
             criterion = torch.nn.MSELoss()
+
+        all_red_bitboards, all_yellow_bitboards, all_players, all_train_eval = train_set
+        size = len(all_red_bitboards)
 
         for epoch in range(epochs):
             print(f"Epoch: {epoch+1}")
             self.nn.train()
             
             evaluation_losses = []
-            batch_count = len(train_set) // batch_size # A bit arbitrary
+            batch_count = size // batch_size # A bit arbitrary
             for batch in range(batch_count):
-                samples = np.random.default_rng().choice(len(train_set), size=batch_size)
+                samples = np.random.default_rng().choice(size, size=batch_size)
 
-                red_bitboards, yellow_bitboards, players, train_eval = zip(*[train_set[i] for i in samples])
-                red_bitboards = torch.LongTensor(np.array(red_bitboards))
-                yellow_bitboards = torch.LongTensor(np.array(yellow_bitboards))
-                players = torch.LongTensor(np.array(players))
-                train_eval = torch.FloatTensor(np.array(train_eval))
+                red_bitboards = all_red_bitboards[samples]
+                yellow_bitboards = all_yellow_bitboards[samples]
+                players = all_players[samples]
+                train_eval = all_train_eval[samples].float()
 
                 if self.device.type == "cuda":
                     red_bitboards = red_bitboards.contiguous().cuda()
