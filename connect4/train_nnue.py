@@ -30,7 +30,7 @@ if __name__ == "__main__":
             nnue_wrapper.load_model(path / "nnue" / "models" / "best.pt")
 
         print("getting training data")
-        TrainingDataPtr = solver.c_get_training_data(50000, book_path)
+        TrainingDataPtr = solver.c_get_training_data(123456, book_path)
         new_training_data = TrainingDataPtr.contents.get_batch_tensors()
 
         # print(np.shape(training_data))
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             training_data = (combined_red_bitboards, combined_yellow_bitboards, combined_players, combined_scores)
         else:
             training_data = new_training_data
-        if len(training_data[0]) > 2000000:
+        if len(training_data[0]) > 20000000:
             training_data = (training_data[0][-2000000:], training_data[1][-2000000:], training_data[2][-2000000:], training_data[3][-2000000:])
         print(np.shape(training_data))
         print("saving training data")
