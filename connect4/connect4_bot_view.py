@@ -162,5 +162,5 @@ class Connect4BotView(discord.ui.LayoutView):
         return np.argmax(self.mcts.get_best_actions(canonical_board, 20))
     
     def minimax_move(self) -> int:
-        # return self.translator.get_best_col_from_board(self.board, self.current_player, self.moves)
-        return self.translator.get_best_col_from_board(self.board, self.current_player)
+        return self.translator.get_best_col_from_board(self.board, self.current_player, self.moves)
+        # return self.translator.get_best_col_from_board(self.board, self.current_player)

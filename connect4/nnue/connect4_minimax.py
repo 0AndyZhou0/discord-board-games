@@ -73,11 +73,11 @@ class Connect4Minimax:
     def get_best_col(game: Connect4Game, player: Color) -> int:
         best_col = None
         best_value = -np.inf
+        game.evaluate_board()
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
             row, col = game.drop_piece_with_color(col, player)
-            # value = -Connect4Minimax.minimax(game, -player, 0)
             value = -Connect4Minimax.minimax(game, -player, 3)
             game.remove_piece(row, col, player)
             if value > best_value:
