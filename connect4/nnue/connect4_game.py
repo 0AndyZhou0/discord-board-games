@@ -1,5 +1,4 @@
 import logging
-from warnings import deprecated
 
 import numpy as np
 
