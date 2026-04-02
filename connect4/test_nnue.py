@@ -36,7 +36,7 @@ def game_test() -> None:
     for col in range(7):
         move = game.drop_piece_with_color(col, Color.RED)
         result = Connect4Minimax.minimax(game, Color.YELLOW, 3)
-        game.remove_piece(move[0], move[1], Color.RED)
+        game.remove_piece_by_color(move[0], move[1], Color.RED)
         print(f"Move: {col}, Result: {result}")
 
     # for col in range(7):
@@ -142,11 +142,30 @@ def test_eval() -> None:
     for col in range(7):
         move = game.drop_piece(col)
         fresh_evals.append(game.evaluate_board_reset())
-        game.remove_piece(move[0], move[1], Color.RED)
+        game.remove_piece(move[0], move[1])
     for col in range(7):
         move = game.drop_piece(col)
         nnue_evals.append(game.evaluate_board())
-        game.remove_piece(move[0], move[1], Color.RED)
+        game.remove_piece(move[0], move[1])
+    print("Fresh evals: ", fresh_evals)
+    print("NNUE evals: ", nnue_evals)
+
+def test_eval2() -> None:
+    game = Connect4Game()
+    game.load_model(model)
+    move = game.drop_piece(3)
+    game.print_bitboard()
+    print(game.evaluate_board_reset())
+    fresh_evals = []
+    nnue_evals = []
+    for col in range(7):
+        move = game.drop_piece(col)
+        fresh_evals.append(game.evaluate_board_reset())
+        game.remove_piece(move[0], move[1])
+    for col in range(7):
+        move = game.drop_piece(col)
+        nnue_evals.append(game.evaluate_board())
+        game.remove_piece(move[0], move[1])
     print("Fresh evals: ", fresh_evals)
     print("NNUE evals: ", nnue_evals)
 
@@ -158,3 +177,4 @@ model = path / "nnue" / "models" / "best.pt"
 # game_test()
 # test_first_8_ply()
 test_eval()
+test_eval2()

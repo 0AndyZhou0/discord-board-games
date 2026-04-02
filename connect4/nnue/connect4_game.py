@@ -80,8 +80,8 @@ class Connect4Game:
                 valid_cols[col] = 1
         return valid_cols
 
-    @deprecated("Might break NNUE")
     def drop_piece_with_color(self, col: int, player: Color) -> tuple[int, int]:
+        raise DeprecationWarning("Use drop_piece instead")
         r = None
         c = col
         for row in range(Connect4.rows - 1, -1, -1):
@@ -123,7 +123,20 @@ class Connect4Game:
         self.moves += str(col+1)
         return r, c
     
-    def remove_piece(self, row: int, col: int, player: Color) -> None:
+    def remove_piece_by_color(self, row: int, col: int, player: Color) -> None:
+        raise DeprecationWarning("Use remove_piece instead")
+        match player:
+            case Color.RED:
+                self.red_bitboard &= ~(1 << (row * Connect4.cols + col))
+            case Color.YELLOW:
+                self.yellow_bitboard &= ~(1 << (row * Connect4.cols + col))
+        # Update NNUE
+        self.remove_feature(row, col, player)
+        self.moves = self.moves[:-1]
+        self.player *= -1
+
+    def remove_piece(self, row: int, col: int) -> None:
+        player = -self.player
         match player:
             case Color.RED:
                 self.red_bitboard &= ~(1 << (row * Connect4.cols + col))

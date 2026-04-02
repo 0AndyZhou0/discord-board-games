@@ -57,11 +57,11 @@ class Connect4Minimax:
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
-            row, col = game.drop_piece_with_color(col, player)
+            row, col = game.drop_piece(col)
             Connect4Minimax.total_non_terminal_time += time.time() - start_time
             value = -Connect4Minimax.minimax(game, -player, depth - 1, -beta, -alpha)
             start_time = time.time()
-            game.remove_piece(row, col, player)
+            game.remove_piece(row, col)
             if value > alpha:
                 alpha = value
             if alpha >= beta:
@@ -77,9 +77,9 @@ class Connect4Minimax:
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
-            row, col = game.drop_piece_with_color(col, player)
+            row, col = game.drop_piece(col)
             value = -Connect4Minimax.minimax(game, -player, 3)
-            game.remove_piece(row, col, player)
+            game.remove_piece(row, col)
             if value > best_value:
                 best_value = value
                 best_col = col
