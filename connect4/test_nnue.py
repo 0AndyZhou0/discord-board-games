@@ -169,6 +169,89 @@ def test_eval2() -> None:
     print("Fresh evals: ", fresh_evals)
     print("NNUE evals: ", nnue_evals)
 
+def test_eval3() -> None:
+    game = Connect4Game()
+    game.load_model(model)
+    move = game.drop_piece(3)
+    move = game.drop_piece(4)
+    move = game.drop_piece(3)
+    move = game.drop_piece(4)
+    move = game.drop_piece(3)
+    move = game.drop_piece(4)
+    game.print_bitboard()
+    print(game.evaluate_board_reset())
+    fresh_evals = []
+    nnue_evals = []
+    for col in range(7):
+        move = game.drop_piece(col)
+        fresh_evals.append(game.evaluate_board_reset())
+        game.remove_piece(move[0], move[1])
+    for col in range(7):
+        move = game.drop_piece(col)
+        nnue_evals.append(game.evaluate_board())
+        game.remove_piece(move[0], move[1])
+    print("Fresh evals: ", fresh_evals)
+    print("NNUE evals: ", nnue_evals)
+
+def test_minimax() -> None:
+    game = Connect4Game()
+    game.load_model(model)
+    move = game.drop_piece(3)
+    game.print_bitboard()
+    print(game.evaluate_board_reset())
+    evals = []
+    for col in range(7):
+        move = game.drop_piece(col)
+        evals.append(Connect4Minimax.minimax(game, 2))
+        game.remove_piece(move[0], move[1])
+    print("NNUE evals: ", evals)
+
+def test_win() -> None:
+    game = Connect4Game()
+    game.drop_piece(0)
+    game.drop_piece(0)
+
+    game.drop_piece(6)
+    game.drop_piece(0)
+
+    game.drop_piece(6)
+    game.drop_piece(0)
+
+    game.drop_piece(0)
+    game.drop_piece(0)
+
+    game.drop_piece(6)
+    game.drop_piece(6)
+
+    game.drop_piece(5)
+    game.drop_piece(6)
+
+    game.drop_piece(5)
+    game.drop_piece(1)
+
+    game.drop_piece(5)
+    game.drop_piece(5)
+
+    game.drop_piece(4)
+    game.drop_piece(5)
+
+    game.print_bitboard()
+    print(game.get_winner())
+
+def test_win2() -> None:
+    game = Connect4Game()
+    game.red_bitboard, game.yellow_bitboard = game.to_bitboards(np.array([
+        [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
+        [Color.EMPTY, Color.EMPTY, Color.YELLOW, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
+        [Color.EMPTY, Color.YELLOW, Color.YELLOW, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
+        [Color.YELLOW, Color.YELLOW, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
+        [Color.YELLOW, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.YELLOW],
+        [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.YELLOW]
+    ]))
+    game.print_bitboard()
+    print(game.get_winner())
+
+
 path = Path(__file__).parent
 model = path / "nnue" / "models" / "best.pt"
 # test_nnue()
@@ -176,5 +259,9 @@ model = path / "nnue" / "models" / "best.pt"
 # test_game()
 # game_test()
 # test_first_8_ply()
-test_eval()
-test_eval2()
+# test_eval()
+# test_eval2()
+# test_eval3()
+# test_minimax()
+# test_win()
+test_win2()
