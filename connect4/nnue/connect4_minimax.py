@@ -73,7 +73,7 @@ class Connect4Minimax:
     def get_best_col(game: Connect4Game, player: Color) -> int:
         best_col = None
         best_value = -np.inf
-        game.evaluate_board()
+        game.evaluate_board_reset()
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue

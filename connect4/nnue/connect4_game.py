@@ -1,4 +1,5 @@
 import logging
+from warnings import deprecated
 
 import numpy as np
 
@@ -34,8 +35,11 @@ class Connect4Game:
     def load_model(self, path: str) -> None:
         self.nnue_wrapper.load_model(path)
 
-    def evaluate_board(self) -> float:
+    def evaluate_board_reset(self) -> float:
         return self.nnue_wrapper.evaluate_board(self.red_bitboard, self.yellow_bitboard, self.player)
+    
+    def evaluate_board(self) -> float:
+        return self.nnue_wrapper.accumulator_forward(self.player)
 
     def to_bitboards(self, board: np.array) -> tuple[np.longlong, np.longlong]:
         red_bitboard = np.longlong(0)
@@ -76,6 +80,7 @@ class Connect4Game:
                 valid_cols[col] = 1
         return valid_cols
 
+    @deprecated("Might break NNUE")
     def drop_piece_with_color(self, col: int, player: Color) -> tuple[int, int]:
         r = None
         c = col
@@ -127,6 +132,7 @@ class Connect4Game:
         # Update NNUE
         self.remove_feature(row, col, player)
         self.moves = self.moves[:-1]
+        self.player *= -1
 
     def add_feature(self, row: int, col: int, player: int) -> None:
         """sets the feature for the given row, col, player"""

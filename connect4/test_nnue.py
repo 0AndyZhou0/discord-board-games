@@ -132,50 +132,23 @@ def test_first_8_ply() -> None:
             print("Eval: ", eval)
             print()
 
-def test_bad_dataset() -> None:
+def test_eval() -> None:
     game = Connect4Game()
     game.load_model(model)
-    bad_dataset = np.load(path / "nnue" / "data" / "bad_dataset.npy", allow_pickle=True)
-    for i, (red_bitboard, yellow_bitboard, player, eval) in enumerate(bad_dataset[0:]):
-        game.red_bitboard = red_bitboard
-        game.yellow_bitboard = yellow_bitboard
-        game.player = player
-        game.print_bitboard()
-        print("Player: ", player)
-        print("Eval: ", eval)
-        print()
-        if i > 10:
-            break
-        # pieces = bin(red_bitboard).count("1") + bin(yellow_bitboard).count("1")
-        # if pieces <= 8:
-        #     game.print_bitboard()
-        #     print("Player: ", player)
-        #     print("Eval: ", eval)
-        #     print()
-
-def fix_bad_dataset() -> None:
-    bad_dataset = np.load(path / "nnue" / "data" / "nnue" / "data" / "bad_dataset.npy", allow_pickle=True)
-    fixed_dataset = []
-    for i, (red_bitboard, yellow_bitboard, player, eval) in enumerate(bad_dataset):
-        if eval == 0:
-            eval = -1
-        fixed_dataset.append((red_bitboard, yellow_bitboard, player, eval))
-    np.save(path / "nnue" / "data" / "bad_dataset_fixed.npy", np.array(fixed_dataset))
-
-def test_fixed_bad_dataset() -> None:
-    game = Connect4Game()
-    game.load_model(model)
-    bad_dataset = np.load(path / "nnue" / "data" / "bad_dataset_fixed.npy", allow_pickle=True)
-    for i, (red_bitboard, yellow_bitboard, player, eval) in enumerate(bad_dataset):
-        game.red_bitboard = red_bitboard
-        game.yellow_bitboard = yellow_bitboard
-        game.player = player
-        game.print_bitboard()
-        print("Player: ", player)
-        print("Eval: ", eval)
-        print()
-        if i > 10:
-            break
+    game.print_bitboard()
+    print(game.evaluate_board_reset())
+    fresh_evals = []
+    nnue_evals = []
+    for col in range(7):
+        move = game.drop_piece(col)
+        fresh_evals.append(game.evaluate_board_reset())
+        game.remove_piece(move[0], move[1], Color.RED)
+    for col in range(7):
+        move = game.drop_piece(col)
+        nnue_evals.append(game.evaluate_board())
+        game.remove_piece(move[0], move[1], Color.RED)
+    print("Fresh evals: ", fresh_evals)
+    print("NNUE evals: ", nnue_evals)
 
 path = Path(__file__).parent
 model = path / "nnue" / "models" / "best.pt"
@@ -184,6 +157,4 @@ model = path / "nnue" / "models" / "best.pt"
 # test_game()
 # game_test()
 # test_first_8_ply()
-# test_bad_dataset()
-# fix_bad_dataset()
-# test_fixed_bad_dataset()
+test_eval()
