@@ -32,5 +32,5 @@ class Connect4Translator:
         game.yellow_bitboard = yellow_bitboard
         game.player = player
         game.moves = moves
-        best_col = Connect4Minimax.get_best_col(game, player)
+        best_col = Connect4Minimax.get_best_col(game)
         return best_col

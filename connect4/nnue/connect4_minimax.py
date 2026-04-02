@@ -35,18 +35,19 @@ class Connect4Minimax:
                     game.yellow_bitboard &= ~(1 << (row * Connect4.cols + col))
         return winning_squares
 
-    def minimax(game: Connect4Game, player: Color, depth: int, alpha: float = -np.inf, beta: float = np.inf) -> float:
+    def minimax(game: Connect4Game, prev_move: tuple[int, int], depth: int, alpha: float = -np.inf, beta: float = np.inf) -> float:
         """Returns value of the board for the given player"""
         # Terminal Node
-        winner = game.get_winner()
+        winner = game.get_winner_from_move(*prev_move)
         if depth <= 0 or winner is not None:
             start_time = time.time()
             if winner is not None:
+                game.print_bitboard()
                 Connect4Minimax.total_terminal_time += time.time() - start_time
-                return -10000-depth
+                return -1000.0 - depth
             Connect4Minimax.total_terminal_time += time.time() - start_time
             # return get_eval(game.moves)
-            return game.nnue_wrapper.accumulator_forward(player)
+            return game.nnue_wrapper.accumulator_forward(game.player)
             
         # TODO: Implement check for fastest win and prune
 
@@ -54,23 +55,25 @@ class Connect4Minimax:
             
 
         start_time = time.time()
+        best_value = -np.inf
         for col in range(Connect4.cols):
             if game.is_column_full(col):
                 continue
             row, col = game.drop_piece(col)
             Connect4Minimax.total_non_terminal_time += time.time() - start_time
-            value = -Connect4Minimax.minimax(game, -player, depth - 1, -beta, -alpha)
+            value = -Connect4Minimax.minimax(game, (row, col), depth - 1, -beta, -alpha)
             start_time = time.time()
             game.remove_piece(row, col)
-            if value > alpha:
-                alpha = value
-            if alpha >= beta:
-                break
+            if value > best_value:
+                best_value = value
+                alpha = max(alpha, best_value)
+            if value >= beta:
+                return best_value
 
         Connect4Minimax.total_non_terminal_time += time.time() - start_time
-        return alpha
+        return best_value
     
-    def get_best_col(game: Connect4Game, player: Color) -> int:
+    def get_best_col(game: Connect4Game) -> int:
         best_col = None
         best_value = -np.inf
         game.evaluate_board_reset()
@@ -78,7 +81,8 @@ class Connect4Minimax:
             if game.is_column_full(col):
                 continue
             row, col = game.drop_piece(col)
-            value = -Connect4Minimax.minimax(game, -player, 3)
+            value = -Connect4Minimax.minimax(game, (row, col), 2)
+            print("col: ", col, "value: ", value)
             game.remove_piece(row, col)
             if value > best_value:
                 best_value = value

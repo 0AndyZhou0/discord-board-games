@@ -165,26 +165,106 @@ class Connect4Game:
         y = bitboard & (bitboard >> 1) # horizontal
         if (y & (y >> 2)): return True  # noqa: SIM103
         return False
+    
+    def get_winner_from_move(self, row: int, col: int) -> Color | None:
+        """Returns -1 if red wins, 1 if yellow wins, 1e-4 if tie, and None if no winner yet"""
+        color = Color.RED if self.red_bitboard & (1 << (row * Connect4.cols + col)) else Color.YELLOW
+        bitboard = self.red_bitboard if color == Color.RED else self.yellow_bitboard
+        # Vertical
+        count = 0
+        for c in range(Connect4.cols):
+            if bitboard & (1 << (row * Connect4.cols + c)):
+                count += 1
+            else:
+                count = 0
+            if count == 4:
+                return color
+        
+        # Horizontal
+        count = 0
+        for r in range(Connect4.rows):
+            if bitboard & (1 << (r * Connect4.cols + col)):
+                count += 1
+            else:
+                count = 0
+            if count == 4:
+                return color
+        
+        # Diagonal \
+        count = 0
+        top_left_row = row - min(row, col)
+        top_left_col = col - min(row, col)
+        while top_left_row < Connect4.rows and top_left_col < Connect4.cols:
+            if bitboard & (1 << (top_left_row * Connect4.cols + top_left_col)):
+                count += 1
+            else:
+                count = 0
+            if count == 4:
+                return color
+            top_left_row += 1
+            top_left_col += 1
+        
+        # Diagonal /
+        count = 0
+        bottom_left_row = row + min(Connect4.rows - 1 - row, col)
+        bottom_left_col = col - min(Connect4.rows - 1 - row, col)
+        while bottom_left_row >= 0 and bottom_left_col < Connect4.cols:
+            if bitboard & (1 << (bottom_left_row * Connect4.cols + bottom_left_col)):
+                count += 1
+            else:
+                count = 0
+            if count == 4:
+                return color
+            bottom_left_row -= 1
+            bottom_left_col += 1
+
+        if self.red_bitboard | self.yellow_bitboard == (1 << (Connect4.rows * Connect4.cols)) - 1:
+            return 1e-4 # tie
+        
+        return None
 
     def get_winner(self) -> Color | None:
         """Returns -1 if red wins, 1 if yellow wins, 1e-4 if tie, and None if no winner yet"""
-        y = self.red_bitboard & (self.red_bitboard >> 6) # diagonal /
-        if (y & (y >> 2 * 6)): return Color.RED
+        y = self.red_bitboard & (self.red_bitboard >> 7) # diagonal /
+        if (y & (y >> 2 * 6)): 
+            print("diagonal /")
+            return Color.RED
         y = self.red_bitboard & (self.red_bitboard >> 7) # vertical
-        if (y & (y >> 2 * 7)): return Color.RED
+        if (y & (y >> 2 * 7)): 
+            print("vertical")
+            return Color.RED
         y = self.red_bitboard & (self.red_bitboard >> 8) # diagonal \
-        if (y & (y >> 2 * 8)): return Color.RED
+        if (y & (y >> 2 * 8)): 
+            print("diagonal \\")
+            return Color.RED
         y = self.red_bitboard & (self.red_bitboard >> 1) # horizontal
-        if (y & (y >> 2)): return Color.RED
+        if (y & (y >> 2)): 
+            print("horizontal")
+            return Color.RED
         
-        y = self.yellow_bitboard & (self.yellow_bitboard >> 6) # diagonal /
-        if (y & (y >> 2 * 6)): return Color.YELLOW
+        y = self.yellow_bitboard & (self.yellow_bitboard >> 8) # diagonal /
+        if (y & (y >> 2 * 8)): 
+            print("diagonal /")
+            return Color.YELLOW
         y = self.yellow_bitboard & (self.yellow_bitboard >> 7) # vertical
-        if (y & (y >> 2 * 7)): return Color.YELLOW
-        y = self.yellow_bitboard & (self.yellow_bitboard >> 8) # diagonal \
-        if (y & (y >> 2 * 8)): return Color.YELLOW
+        if (y & (y >> 2 * 7)): 
+            print("vertical")
+            return Color.YELLOW
+        y = self.yellow_bitboard & (self.yellow_bitboard >> 9) # diagonal \
+        if (y & (y >> 2 * 9)): 
+            self.red_bitboard = 0
+            # self.yellow_bitboard = self.yellow_bitboard >> 8
+            # self.yellow_bitboard = y
+            self.yellow_bitboard = y >> 2 * 5
+            print()
+            self.print_bitboard()
+            exit(0)
+            print("diagonal \\")
+            return Color.YELLOW
         y = self.yellow_bitboard & (self.yellow_bitboard >> 1) # horizontal
-        if (y & (y >> 2)): return Color.YELLOW
+        if (y & (y >> 2)): 
+            print("horizontal")
+            return Color.YELLOW
         
         if self.red_bitboard | self.yellow_bitboard == (1 << (Connect4.rows * Connect4.cols)) - 1:
             return 1e-4 # tie
