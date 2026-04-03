@@ -62,6 +62,19 @@ class Connect4Game:
                     print(".", end="")
             print()
 
+    def to_string(self) -> None:
+        s = ""
+        for i in range(Connect4.rows):
+            for j in range(Connect4.cols):
+                if self.red_bitboard & (1 << (i * Connect4.cols + j)):
+                    s += "R"
+                elif self.yellow_bitboard & (1 << (i * Connect4.cols + j)):
+                    s += "Y"
+                else:
+                    s += "."
+            s += "\n"
+        return s
+
     def is_column_full(self, col: int) -> bool:
         return self.red_bitboard & (1 << col) or self.yellow_bitboard & (1 << col)
     
