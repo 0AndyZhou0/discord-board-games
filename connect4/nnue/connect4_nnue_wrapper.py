@@ -9,6 +9,7 @@ class Connect4NNUEWrapper:
         self.nn = Connect4NNUE()
         self.batch_size = batch_size
         self.rows, self.cols = rows, cols
+        self.random = np.random.default_rng()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.device.type == "cuda":
             self.nn.cuda()
@@ -55,15 +56,13 @@ class Connect4NNUEWrapper:
         all_red_bitboards, all_yellow_bitboards, all_players, all_train_eval = train_set
         size = len(all_red_bitboards)
 
-        random = np.random.default_rng()
-
         for epoch in range(epochs):
             print(f"Epoch: {epoch+1}")
             self.nn.train()
             
             evaluation_losses = []
             for batch in range(batch_count):
-                samples = random.choice(size, size=batch_size)
+                samples = self.random.choice(size, size=batch_size)
 
                 red_bitboards = all_red_bitboards[samples]
                 yellow_bitboards = all_yellow_bitboards[samples]
