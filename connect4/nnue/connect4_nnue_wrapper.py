@@ -55,13 +55,15 @@ class Connect4NNUEWrapper:
         all_red_bitboards, all_yellow_bitboards, all_players, all_train_eval = train_set
         size = len(all_red_bitboards)
 
+        random = np.random.default_rng()
+
         for epoch in range(epochs):
             print(f"Epoch: {epoch+1}")
             self.nn.train()
             
             evaluation_losses = []
             for batch in range(batch_count):
-                samples = np.random.default_rng().choice(size, size=batch_size)
+                samples = random.choice(size, size=batch_size)
 
                 red_bitboards = all_red_bitboards[samples]
                 yellow_bitboards = all_yellow_bitboards[samples]
