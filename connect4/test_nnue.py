@@ -102,11 +102,36 @@ def test_eval2() -> None:
     print("Fresh evals: ", fresh_evals)
     print("NNUE evals: ", nnue_evals)
 
+def test_eval_on_moves(moves: str) -> None:
+    game = Connect4Game()
+    game.load_model(model)
+
+    # Play moves
+    for move in moves:
+        game.drop_piece(int(move) - 1)
+
+    game.print_bitboard()
+    print(game.evaluate_board_reset())
+
+    fresh_evals = []
+    nnue_evals = []
+    for col in range(7):
+        move = game.drop_piece(col)
+        fresh_evals.append(game.evaluate_board_reset())
+        game.remove_piece(move[0], move[1])
+    for col in range(7):
+        move = game.drop_piece(col)
+        nnue_evals.append(game.evaluate_board())
+        game.remove_piece(move[0], move[1])
+    print("Fresh evals: ", fresh_evals)
+    print("NNUE evals: ", nnue_evals)
+
 path = Path(__file__).parent
 model = path / "nnue" / "models" / "best.pt"
 # test_nnue()
 # test_nnue_wrapper()
 # test_game()
 # test_first_8_ply()
-test_eval()
-test_eval2()
+# test_eval()
+# test_eval2()
+test_eval_on_moves("4141")
