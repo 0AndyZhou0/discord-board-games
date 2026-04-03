@@ -15,6 +15,7 @@ class Connect4Translator:
         self.path_dir = Path(__file__).parent
         model_path = self.path_dir / "models" / "best.pt"
         self.game.load_model(model_path)
+        self.minimax = Connect4Minimax()
 
     # def get_best_col_from_board(self, board: np.array, player: Color) -> int:
     #     game = self.game
@@ -32,5 +33,5 @@ class Connect4Translator:
         game.yellow_bitboard = yellow_bitboard
         game.player = player
         game.moves = moves
-        best_col = Connect4Minimax.get_best_col(game)
+        best_col = self.minimax.iterative_deepening(game, 5)
         return best_col
