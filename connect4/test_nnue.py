@@ -7,73 +7,6 @@ from nnue.connect4_game import Color, Connect4Game
 from nnue.connect4_minimax import Connect4Minimax
 from nnue.connect4_nnue import Connect4NNUE
 
-def game_test() -> None:
-    game = Connect4Game()
-    game.load_model(model)
-    # board = np.array([
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.YELLOW, Color.RED, Color.YELLOW, Color.YELLOW, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.RED, Color.YELLOW, Color.RED, Color.RED, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.YELLOW, Color.YELLOW, Color.YELLOW, Color.RED, Color.EMPTY]
-    # ])
-    # board = np.array([
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.RED, Color.YELLOW, Color.YELLOW, Color.YELLOW, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.RED, Color.YELLOW, Color.RED, Color.RED, Color.EMPTY],
-    #     [Color.EMPTY, Color.EMPTY, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.EMPTY]
-    # ])
-    # red_bitboard, yellow_bitboard = game.to_bitboards(board)
-    # game.red_bitboard = red_bitboard
-    # game.yellow_bitboard = yellow_bitboard
-
-    game.print_bitboard()
-    result = Connect4Minimax.minimax(game, Color.RED, 4)
-    print(result)
-    for col in range(7):
-        move = game.drop_piece_with_color(col, Color.RED)
-        result = Connect4Minimax.minimax(game, Color.YELLOW, 3)
-        game.remove_piece_by_color(move[0], move[1], Color.RED)
-        print(f"Move: {col}, Result: {result}")
-
-    # for col in range(7):
-    #     move = game.drop_piece(col, Color.RED)
-    #     result = Connect4Minimax.minimax(game, Color.YELLOW, 2)
-    #     game.remove_piece(move[0], move[1], Color.RED)
-    #     print(f"Move: {col}, Result: {result}")
-
-    # Connect4Minimax.minimax(game, Color.RED, 5)
-
-    move = game.drop_piece_with_color(1, Color.RED)
-    move = game.drop_piece_with_color(2, Color.YELLOW)
-    move = game.drop_piece_with_color(3, Color.RED)
-    move = game.drop_piece_with_color(4, Color.YELLOW)
-    move = game.drop_piece_with_color(5, Color.RED)
-    move = game.drop_piece_with_color(6, Color.YELLOW)
-    game.print_bitboard()
-    result = Connect4Minimax.minimax(game, Color.RED, 3)
-    print(f"Result: {result}")
-    move = game.drop_piece_with_color(1, Color.RED)
-    move = game.drop_piece_with_color(2, Color.YELLOW)
-    move = game.drop_piece_with_color(3, Color.RED)
-    move = game.drop_piece_with_color(4, Color.YELLOW)
-    move = game.drop_piece_with_color(5, Color.RED)
-    move = game.drop_piece_with_color(6, Color.YELLOW)
-    move = game.drop_piece_with_color(2, Color.RED)
-    move = game.drop_piece_with_color(4, Color.YELLOW)
-    move = game.drop_piece_with_color(6, Color.RED)
-    move = game.drop_piece_with_color(5, Color.YELLOW)
-    move = game.drop_piece_with_color(6, Color.RED)
-    move = game.drop_piece_with_color(2, Color.YELLOW)
-    move = game.drop_piece_with_color(4, Color.RED)
-    move = game.drop_piece_with_color(2, Color.YELLOW)
-    game.print_bitboard()
-    result = Connect4Minimax.minimax(game, Color.RED, 3)
-    print(f"NNUE Result: {result}")
-
 def test_nnue() -> None:
     game = Connect4Game()
     game.nnue_wrapper.load_model(model)
@@ -174,7 +107,6 @@ model = path / "nnue" / "models" / "best.pt"
 # test_nnue()
 # test_nnue_wrapper()
 # test_game()
-# game_test()
 # test_first_8_ply()
 test_eval()
 test_eval2()
