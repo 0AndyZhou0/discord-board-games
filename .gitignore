@@ -1,6 +1,7 @@
 # nn
 temp.pt
-train_sets*.npy
+train*.npy
+train*.pt
 best*.pt
 *.npy
 
