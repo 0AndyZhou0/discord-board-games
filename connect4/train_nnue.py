@@ -12,6 +12,9 @@ logging.basicConfig()
 logger = logging.getLogger("cogs.connect4.nnue.train")
 
 if __name__ == "__main__":
+    MAX_TRAINING_POSITIONS = 20000000
+    NUM_SAMPLES = 0
+
     # logger.setLevel(logging.INFO)
     logger.setLevel(logging.DEBUG)
 
@@ -53,18 +56,23 @@ if __name__ == "__main__":
             training_data = (combined_red_bitboards, combined_yellow_bitboards, combined_players, combined_scores)
         else:
             training_data = new_training_data
-        if len(training_data[0]) > 20000000:
-            training_data = (training_data[0][-2000000:], training_data[1][-2000000:], training_data[2][-2000000:], training_data[3][-2000000:])
+        if len(training_data[0]) > MAX_TRAINING_POSITIONS:
+            training_data = (training_data[0][-MAX_TRAINING_POSITIONS:], \
+                            training_data[1][-MAX_TRAINING_POSITIONS:], \
+                            training_data[2][-MAX_TRAINING_POSITIONS:], \
+                            training_data[3][-MAX_TRAINING_POSITIONS:])
 
         logger.info(f"training data shape: {np.shape(training_data)}")
 
-        game.red_bitboard = training_data[0][0]
-        game.yellow_bitboard = training_data[1][0]
-        game.player = training_data[2][0]
-        logger.debug(f"Board:\n{game.to_string()}")
-        logger.debug(f"Player: {game.player}")
-        logger.debug(f"Eval: {training_data[3][0]}")
-        logger.debug("")
+        for i in range(NUM_SAMPLES):
+            logger.debug(f"Training data index: {i}")
+            game.red_bitboard = training_data[0][i]
+            game.yellow_bitboard = training_data[1][i]
+            game.player = training_data[2][i]
+            logger.debug(f"Board:\n{game.to_string()}")
+            logger.debug(f"Player: {game.player}")
+            logger.debug(f"Eval: {training_data[3][i]}")
+            logger.debug("")
         
         logger.info("saving training data")
         torch.save(training_data, path / "nnue" / "data" / "training_data.pt")
