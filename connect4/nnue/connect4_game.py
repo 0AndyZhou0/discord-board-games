@@ -34,6 +34,13 @@ class Connect4Game:
     def load_model(self, path: str) -> None:
         self.nnue_wrapper.load_model(path)
 
+    def reset(self) -> None:
+        self.red_bitboard = np.longlong(0)
+        self.yellow_bitboard = np.longlong(0)
+        self.player = Color.RED
+        self.moves = ""
+        self.evaluate_board_reset()
+
     def evaluate_board_reset(self) -> float:
         return self.nnue_wrapper.evaluate_board(self.red_bitboard, self.yellow_bitboard, self.player)
     

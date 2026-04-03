@@ -1,5 +1,6 @@
 import ctypes
 from pathlib import Path
+from tabnanny import verbose
 
 import numpy as np
 import torch
@@ -7,6 +8,8 @@ import torch
 from nnue.connect4_game import Connect4Game
 from get_training_from_cpp import TrainingData
 from nnue.connect4_nnue_wrapper import Connect4NNUEWrapper
+from nnue.connect4_battle import Battle
+
 import logging
 logging.basicConfig()
 logger = logging.getLogger("cogs.connect4.nnue.train")
@@ -14,36 +17,41 @@ logger = logging.getLogger("cogs.connect4.nnue.train")
 if __name__ == "__main__":
     MAX_TRAINING_POSITIONS = 20000000
     NUM_SAMPLES = 0
+    path = Path(__file__).parent
+    book_path = (path / "nnue" / "7x6.book").__bytes__()
+    training_data_path = path / "nnue" / "data" / "training_data.pt"
+    model_path = path / "nnue" / "models" / "best.pt"
 
     # logger.setLevel(logging.INFO)
     logger.setLevel(logging.DEBUG)
+    logging.getLogger("cogs.connect4.nn.battle").setLevel(logging.DEBUG)
 
     game = Connect4Game()
 
-    path = Path(__file__).parent
     # training_data = torch.load(path / "nnue" / "data" / "training_data.pt")
-    book_path = (path / "nnue" / "7x6.book").__bytes__()
     solver = ctypes.CDLL(path / "nnue" / "trainingData.so")
     solver.c_get_training_data.restype = ctypes.POINTER(TrainingData)
     TrainingDataPtr = ctypes.POINTER(TrainingData)
 
     training_data = []
-    if Path.exists(path / "nnue" / "data" / "training_data.pt"):
-        training_data = torch.load(path / "nnue" / "data" / "training_data.pt")
+    if Path.exists(training_data_path):
+        training_data = torch.load(training_data_path)
 
     nnue_wrapper = Connect4NNUEWrapper()
-    if Path.exists(path / "nnue" / "models" / "best.pt"):
+    if Path.exists(model_path):
         logger.info("loading model")
-        nnue_wrapper.load_model(path / "nnue" / "models" / "best.pt")
+        nnue_wrapper.load_model(model_path)
     
     iters = 1000
 
     for i in range(iters):
         logger.info(f"iter: {i}")
 
+
         logger.info("getting training data")
-        TrainingDataPtr = solver.c_get_training_data(123456, book_path)
+        TrainingDataPtr = solver.c_get_training_data(1234567, book_path)
         new_training_data = TrainingDataPtr.contents.get_batch_tensors()
+
 
         # print(np.shape(training_data))
         if training_data:
@@ -75,12 +83,23 @@ if __name__ == "__main__":
             logger.debug("")
         
         logger.info("saving training data")
-        torch.save(training_data, path / "nnue" / "data" / "training_data.pt")
+        torch.save(training_data, training_data_path)
 
         logger.info("training")
         nnue_wrapper.train(training_data, epochs=10, batch_size=2048, batch_count=100)
 
+
+
         # battle nnue against old nnue
+        # old_game = Connect4Game()
+        # if Path.exists(model_path):
+        #     logger.info("loading old model")
+        #     old_game.load_model(model_path)
+        # new_wins, ties, old_wins = Battle.battles(game, old_game, num_games=2)
+
+        # if new_wins >= old_wins:
+        #     logger.info("saving new model")
+        #     nnue_wrapper.save_model(model_path)
 
         logger.info("saving model")
-        nnue_wrapper.save_model(path / "nnue" / "models" / f"best.pt")
+        nnue_wrapper.save_model(model_path)
