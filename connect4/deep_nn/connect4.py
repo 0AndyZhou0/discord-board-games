@@ -128,6 +128,9 @@ class Connect4:
     
     def is_column_full(board: np.array, col: int) -> bool:
         return board[0][col] != Color.EMPTY
+    
+    def is_game_tie(board: np.array) -> bool:
+        return board.all()
 
     def get_game_win(board: np.array, row: int, col: int) -> Color | None:
         """

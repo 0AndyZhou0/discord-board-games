@@ -41,7 +41,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
             self.disabled = True
         winner = view.check_for_win(*move)
         if winner is not None:
-            if winner == 0:
+            if view.is_game_tie():
                 view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
             else:
                 view.text_display.content = f"<@{view.player_id}> wins against the bot!\n{view.emoji_board}"
@@ -58,7 +58,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
                     button.disabled = True
         winner = view.check_for_win(*move)
         if winner is not None:
-            if winner == 0:
+            if view.is_game_tie():
                 view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
             else:
                 view.text_display.content = f"The bot wins against <@{view.player_id}>!\n{view.emoji_board}"
@@ -131,6 +131,9 @@ class Connect4BotView(discord.ui.LayoutView):
     
     def is_column_full(self, col: int) -> bool:
         return Connect4.is_column_full(self.board, col)
+    
+    def is_game_tie(self) -> bool:
+        return Connect4.is_game_tie(self.board)
     
     def check_for_win(self, row: int, col: int) -> Color | None:
         return Connect4.get_game_win(self.board, row, col)
