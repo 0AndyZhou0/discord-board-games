@@ -46,7 +46,7 @@ class Connect4NNUEWrapper:
             # print(result)
             return self.nn.accumulator_forward(player).data.cpu().numpy()[0]
 
-    def train(self, train_set: tuple[torch.LongTensor], epochs: int = 10, batch_size: int = 128, optimizer: torch.optim.Optimizer = None, criterion: torch.nn.Module = None) -> None:
+    def train(self, train_set: tuple[torch.LongTensor], epochs: int = 10, batch_size: int = 2048, batch_count: int = 10, optimizer: torch.optim.Optimizer = None, criterion: torch.nn.Module = None) -> None:
         if optimizer is None:
             optimizer = torch.optim.Adam(self.nn.parameters())
         if criterion is None:
@@ -60,7 +60,6 @@ class Connect4NNUEWrapper:
             self.nn.train()
             
             evaluation_losses = []
-            batch_count = size // batch_size # A bit arbitrary
             for batch in range(batch_count):
                 samples = np.random.default_rng().choice(size, size=batch_size)
 

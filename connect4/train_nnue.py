@@ -78,7 +78,7 @@ if __name__ == "__main__":
         torch.save(training_data, path / "nnue" / "data" / "training_data.pt")
 
         logger.info("training")
-        nnue_wrapper.train(training_data, epochs=10, batch_size=2048)
+        nnue_wrapper.train(training_data, epochs=10, batch_size=2048, batch_count=100)
 
         # battle nnue against old nnue
 
