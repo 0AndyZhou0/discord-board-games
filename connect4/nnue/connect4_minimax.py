@@ -82,30 +82,34 @@ class Connect4Minimax:
         return best_value
     
     def iterative_deepening(self, game: Connect4Game, depth: int = 5) -> int:
-        game.evaluate_board_reset()
+        # game.evaluate_board_reset()
         for d in range(depth):
             col = self.get_best_col(game, d)
         return col
     
     def get_best_col(self, game: Connect4Game, depth: int) -> int:
         best_col = None
+        best_cols = []
         best_value = -np.inf
         # Get column order
         evals = self.table.get(game.red_bitboard, game.yellow_bitboard)
         order = np.flip(np.argsort(evals))
-        new_order = np.zeros(Connect4.cols)
+        new_values = np.zeros(Connect4.cols)
         for col in order:
             if game.is_column_full(col):
-                new_order[col] = -np.inf
+                new_values[col] = -np.inf
                 continue
             row, col = game.drop_piece(col)
             value = -self.minimax(game, (row, col), depth)
             game.remove_piece(row, col)
-            new_order[col] = value
+            new_values[col] = value
             if value > best_value:
                 best_value = value
                 best_col = col
-        self.table.add(game.red_bitboard, game.yellow_bitboard, new_order)
+                best_cols = [col]
+            elif value == best_value:
+                best_cols.append(col)
+        self.table.add(game.red_bitboard, game.yellow_bitboard, new_values)
         # print("New Order: ", new_order)
         assert best_col is not None
-        return best_col
+        return np.random.choice(best_cols)
