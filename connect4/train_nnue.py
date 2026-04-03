@@ -15,7 +15,7 @@ logging.basicConfig()
 logger = logging.getLogger("cogs.connect4.nnue.train")
 
 if __name__ == "__main__":
-    MAX_TRAINING_POSITIONS = 20000000
+    MAX_TRAINING_POSITIONS = 2000000
     NUM_SAMPLES = 0
     path = Path(__file__).parent
     book_path = (path / "nnue" / "7x6.book").__bytes__()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
 
         logger.info("getting training data")
-        TrainingDataPtr = solver.c_get_training_data(1234567, book_path)
+        TrainingDataPtr = solver.c_get_training_data(12345, book_path)
         new_training_data = TrainingDataPtr.contents.get_batch_tensors()
 
 
