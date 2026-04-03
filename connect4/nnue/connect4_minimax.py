@@ -46,7 +46,7 @@ class Connect4Minimax:
             start_time = time.time()
             if winner is not None:
                 self.total_terminal_time += time.time() - start_time
-                return -1000.0 - depth
+                return -10000.0 - depth
             self.total_terminal_time += time.time() - start_time
             # return get_eval(game.moves)
             return game.nnue_wrapper.accumulator_forward(game.player)
@@ -82,8 +82,7 @@ class Connect4Minimax:
         return best_value
     
     def iterative_deepening(self, game: Connect4Game, depth: int = 5) -> int:
-        # game.evaluate_board_reset()
-        for d in range(depth):
+        for d in range(depth + 1):
             col = self.get_best_col(game, d)
         return col
     
@@ -110,6 +109,5 @@ class Connect4Minimax:
             elif value == best_value:
                 best_cols.append(col)
         self.table.add(game.red_bitboard, game.yellow_bitboard, new_values)
-        # print("New Order: ", new_order)
         assert best_col is not None
         return np.random.choice(best_cols)

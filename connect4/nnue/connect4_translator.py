@@ -33,5 +33,6 @@ class Connect4Translator:
         game.yellow_bitboard = yellow_bitboard
         game.player = player
         game.moves = moves
-        best_col = self.minimax.iterative_deepening(game, 3)
+        game.evaluate_board_reset()
+        best_col = self.minimax.iterative_deepening(game, 0)
         return best_col
