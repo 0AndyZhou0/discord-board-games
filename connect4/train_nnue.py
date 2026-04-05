@@ -100,6 +100,8 @@ if __name__ == "__main__":
         # if new_wins >= old_wins:
         #     logger.info("saving new model")
         #     nnue_wrapper.save_model(model_path)
+        # else:
+        #     logger.info("Not saving model")
 
         logger.info("saving model")
         nnue_wrapper.save_model(model_path)
