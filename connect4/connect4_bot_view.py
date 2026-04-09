@@ -50,6 +50,8 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
             await interaction.response.edit_message(view=view)
             return
         
+        view.deferred = await interaction.response.defer()
+        
         # Bot Move
         move = view.bot_move()
         if view.is_column_full(move[1]):
@@ -64,11 +66,13 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
                 view.text_display.content = f"The bot wins against <@{view.player_id}>!\n{view.emoji_board}"
             view.stop_game()
             view.stop()
-            await interaction.response.edit_message(view=view)
+            # await interaction.response.edit_message(view=view)
+            await interaction.followup.edit_message(view=view, message_id=interaction.message.id)
             return
         
         # Update Board
-        await interaction.response.edit_message(view=view)
+        # await interaction.response.edit_message(view=view)
+        await interaction.followup.edit_message(view=view, message_id=interaction.message.id)
         
         
 
@@ -81,6 +85,7 @@ class Connect4BotView(discord.ui.LayoutView):
         self.player_color = player_color
         self.bot_mode = bot_mode
         self.moves = ""
+        self.deferred = None
 
         if bot_mode == BotMode.MCTS_NN:
             path = Path(__file__).parent / "deep_nn" / "models"

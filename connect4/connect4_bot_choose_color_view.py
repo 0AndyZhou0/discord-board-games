@@ -41,12 +41,12 @@ class ChooseColorButton(discord.ui.Button['Connect4BotChooseColorView']):
         match player_1_choice:
             case Color.RED:
                 logger.info(f"<@{view.player_1_id}> chose RED. <@{view.player_1_id}> goes first")
-                await interaction.response.defer(ephemeral=True)
+                await interaction.response.defer()
                 await interaction.followup.edit_message(message_id=interaction.message.id, view=Connect4BotView(view.player_1_id, Color.RED, view.bot_mode))
                 return
             case Color.YELLOW:
                 logger.info(f"<@{view.player_1_id}> chose YELLOW. Bot goes first")
-                await interaction.response.defer(ephemeral=True)
+                await interaction.response.defer()
                 await interaction.followup.edit_message(message_id=interaction.message.id, view=Connect4BotView(view.player_1_id, Color.YELLOW, view.bot_mode))
                 return
 

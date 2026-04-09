@@ -30,7 +30,7 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeBotChooseSymbolView']):
         view.player_choice = self.symbol
         X_player = view.determine_X_player(view.player_choice)
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         if X_player == user_id:
             view.stop()

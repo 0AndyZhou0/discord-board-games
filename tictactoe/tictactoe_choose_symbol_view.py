@@ -29,7 +29,7 @@ class ChooseSymbolButton(discord.ui.Button['TicTacToeChooseSymbolView']):
             await interaction.response.send_message(content="You are not in the game", ephemeral=True)
             return
         
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
         
         if view.player_1_choice is not None and view.player_2_choice is not None:
             X_player = view.determine_X_player(view.player_1_choice, view.player_2_choice)

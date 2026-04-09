@@ -38,7 +38,7 @@ class ChooseColorButton(discord.ui.Button['Connect4ChooseColorView']):
         if user_id == view.player_2_id:
             view.player_2_choice = self.symbol
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         if view.player_1_choice is not None and view.player_2_choice is not None:
             red_player = view.determine_red_player(view.player_1_choice, view.player_2_choice)
