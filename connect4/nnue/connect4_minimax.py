@@ -13,7 +13,8 @@ from .connect4_transposition_table import Connect4TranspositionTable
 
 class Connect4Minimax:
     def __init__(self) -> None:
-        self.table = Connect4TranspositionTable()
+        self.bounds_table = Connect4TranspositionTable()
+        self.values_table = Connect4TranspositionTable()
         self.total_terminal_time = 0
         self.total_non_terminal_time = 0
 
@@ -51,63 +52,85 @@ class Connect4Minimax:
             # return get_eval(game.moves)
             return game.nnue_wrapper.accumulator_forward(game.player)
             
-        # TODO: Implement check for fastest win and prune
+        # Prune based on number of moves left
+        min_value = -(Connect4.cols * Connect4.rows - 2 - len(game.moves)) // 2
+        if alpha < min_value:
+            alpha = min_value
+            if alpha >= beta:
+                return alpha
+        
+        max_value = (Connect4.cols * Connect4.rows - 1 - len(game.moves)) // 2
+        if beta > max_value:
+            beta = max_value
+            if alpha >= beta:
+                return beta
 
-        # TODO: Implement null move pruning
-            
+        # Prune with table bounds
+        if self.bounds_table.contains(game.moves):
+            table_value = self.bounds_table.get(game.moves)
+            if table_value > 2 * 18 + 1:
+                min_value = table_value - 3 * 18 - 2
+                if alpha < min_value:
+                    alpha = min_value
+                    if alpha >= beta:
+                        return alpha
+            else:
+                max_value = table_value - 18 - 1
+                if beta > max_value:
+                    beta = max_value
+                    if alpha >= beta:
+                        return beta
+
+
+
+        # Sort columns by evaluation
+        evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
+        order = np.flip(np.argsort(evals))
+
 
         start_time = time.time()
-        best_value = -np.inf
-        evals = self.table.get(game.red_bitboard, game.yellow_bitboard)
-        order = np.flip(np.argsort(evals))
-        new_order = np.zeros(Connect4.cols)
         for col in order:
-            if game.is_column_full(col):
-                new_order[col] = -np.inf
+            if game.is_column_full(col) or evals[col] < -500:
                 continue
             row, col = game.drop_piece(col)
             self.total_non_terminal_time += time.time() - start_time
             value = -self.minimax(game, (row, col), depth - 1, -beta, -alpha)
             start_time = time.time()
             game.remove_piece(row, col)
-            new_order[col] = value
-            if value > best_value:
-                best_value = value
-                alpha = max(alpha, best_value)
+            if value > alpha:
+                alpha = value
             if value >= beta:
-                return best_value
+                self.bounds_table.add(game.moves, value + 3 * 18 + 2)
+                return value
 
-        self.table.add(game.red_bitboard, game.yellow_bitboard, new_order)
+        self.bounds_table.add(game.moves, alpha + 18 + 1)
+        self.values_table.add(game.moves, alpha)
         self.total_non_terminal_time += time.time() - start_time
-        return best_value
+        return alpha
     
     def iterative_deepening(self, game: Connect4Game, depth: int = 5) -> int:
-        for d in range(depth + 1):
+        for d in range(1, depth + 1):
             col = self.get_best_col(game, d)
         return col
     
     def get_best_col(self, game: Connect4Game, depth: int) -> int:
-        best_col = None
         best_cols = []
         best_value = -np.inf
         # Get column order
-        evals = self.table.get(game.red_bitboard, game.yellow_bitboard)
+        evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
         order = np.flip(np.argsort(evals))
-        new_values = np.zeros(Connect4.cols)
         for col in order:
-            if game.is_column_full(col):
-                new_values[col] = -np.inf
+            if game.is_column_full(col) or evals[col] < -500:
                 continue
             row, col = game.drop_piece(col)
-            value = -self.minimax(game, (row, col), depth)
+            value = -self.minimax(game, (row, col), depth-1, 0, 1)
             game.remove_piece(row, col)
-            new_values[col] = value
+            if value > 500: # Instantly play winning move
+                return col
             if value > best_value:
                 best_value = value
-                best_col = col
                 best_cols = [col]
             elif value == best_value:
                 best_cols.append(col)
-        self.table.add(game.red_bitboard, game.yellow_bitboard, new_values)
-        assert best_col is not None
+        self.values_table.add(game.moves, best_value)
         return np.random.choice(best_cols)
