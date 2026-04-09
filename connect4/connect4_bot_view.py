@@ -59,7 +59,7 @@ class Connect4Button(discord.ui.Button["Connect4BotView"]):
         winner = view.check_for_win(*move)
         if winner is not None:
             if view.is_game_tie():
-                view.text_display.content = f"<@{view.player_id}> and <@{view.bot_id}> tied!\n{view.emoji_board}"
+                view.text_display.content = f"<@{view.player_id}> and bot tied!\n{view.emoji_board}"
             else:
                 view.text_display.content = f"The bot wins against <@{view.player_id}>!\n{view.emoji_board}"
             view.stop_game()
