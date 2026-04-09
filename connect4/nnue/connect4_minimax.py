@@ -123,7 +123,8 @@ class Connect4Minimax:
             if game.is_column_full(col) or evals[col] < -500:
                 continue
             row, col = game.drop_piece(col)
-            value = -self.minimax(game, (row, col), depth-1, 0, 1)
+            # value = -self.minimax(game, (row, col), depth-1, 0, 1)
+            value = -self.minimax(game, (row, col), depth-1, -18, 18)
             game.remove_piece(row, col)
             if value > 500: # Instantly play winning move
                 return col
