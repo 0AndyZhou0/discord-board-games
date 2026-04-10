@@ -108,30 +108,31 @@ class Connect4Minimax:
         self.total_non_terminal_time += time.time() - start_time
         return alpha
     
-    def iterative_deepening(self, game: Connect4Game, depth: int = 5) -> int:
-        for d in range(1, depth + 1):
-            col = self.get_best_col(game, d)
-        return col
+    # def iterative_deepening(self, game: Connect4Game, depth: int = 5) -> int:
+    #     for d in range(1, depth + 1):
+    #         col = self.get_best_col(game, d)
+    #     return col
     
     def get_best_col(self, game: Connect4Game, depth: int) -> int:
         best_cols = []
         best_value = -np.inf
-        # Get column order
-        evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
-        order = np.flip(np.argsort(evals))
-        for col in order:
-            if game.is_column_full(col) or evals[col] < -500:
-                continue
-            row, col = game.drop_piece(col)
-            # value = -self.minimax(game, (row, col), depth-1, 0, 1)
-            value = -self.minimax(game, (row, col), depth-1, -18, 18)
-            game.remove_piece(row, col)
-            if value > 500: # Instantly play winning move
-                return col
-            if value > best_value:
-                best_value = value
-                best_cols = [col]
-            elif value == best_value:
-                best_cols.append(col)
-        self.values_table.add(game.moves, best_value)
+        for d in range(1, depth + 1):
+            # Get column order
+            evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
+            order = np.flip(np.argsort(evals))
+            for col in order:
+                if game.is_column_full(col) or evals[col] < -500:
+                    continue
+                row, col = game.drop_piece(col)
+                # value = -self.minimax(game, (row, col), d-1, 0, 1)
+                value = -self.minimax(game, (row, col), d-1, -18, 18)
+                game.remove_piece(row, col)
+                if value > 500: # Instantly play winning move
+                    return col
+                if value > best_value:
+                    best_value = value
+                    best_cols = [col]
+                elif value == best_value:
+                    best_cols.append(col)
+            self.values_table.add(game.moves, best_value)
         return np.random.choice(best_cols)
