@@ -121,6 +121,25 @@ class Connect4Game:
         self.moves += str(col+1)
         return r, c
     
+    def get_bitboards_from_drop(self, col: int) -> tuple[np.longlong, np.longlong]:
+        r = None
+        c = col
+        for row in range(Connect4.rows - 1, -1, -1):
+            if not self.red_bitboard & (1 << (row * Connect4.cols + col)) and not self.yellow_bitboard & (1 << (row * Connect4.cols + col)):
+                r = row
+                break
+        if r is None:
+            logger.error(f"Column {col} is full")
+            raise Exception("Column is full")
+        match self.player:
+            case Color.RED:
+                new_red_bitboard = self.red_bitboard | (1 << (r * Connect4.cols + c))
+                return new_red_bitboard, self.yellow_bitboard
+            case Color.YELLOW:
+                new_yellow_bitboard = self.yellow_bitboard | (1 << (r * Connect4.cols + c))
+                return self.red_bitboard, new_yellow_bitboard
+        raise Exception("Player not found")
+    
     def drop_piece(self, col: int) -> tuple[int, int]:
         r = None
         c = col

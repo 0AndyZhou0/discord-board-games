@@ -66,8 +66,8 @@ class Connect4Minimax:
                 return beta
 
         # Prune with table bounds
-        if self.bounds_table.contains(game.moves):
-            table_value = self.bounds_table.get(game.moves)
+        if self.bounds_table.contains(game.red_bitboard, game.yellow_bitboard):
+            table_value = self.bounds_table.get(game.red_bitboard, game.yellow_bitboard)
             if table_value > 2 * 18 + 1:
                 min_value = table_value - 3 * 18 - 2
                 if alpha < min_value:
@@ -84,13 +84,13 @@ class Connect4Minimax:
 
 
         # Sort columns by evaluation
-        evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
+        evals = [self.values_table.get(*game.get_bitboards_from_drop(col)) if not game.is_column_full(col) else -10000 for col in range(Connect4.cols)]
         order = np.flip(np.argsort(evals))
 
 
         start_time = time.time()
         for col in order:
-            if game.is_column_full(col) or evals[col] < -500:
+            if game.is_column_full(col):
                 continue
             row, col = game.drop_piece(col)
             self.total_non_terminal_time += time.time() - start_time
@@ -100,11 +100,11 @@ class Connect4Minimax:
             if value > alpha:
                 alpha = value
             if value >= beta:
-                self.bounds_table.add(game.moves, value + 3 * 18 + 2)
+                self.bounds_table.add(game.red_bitboard, game.yellow_bitboard, value + 3 * 18 + 2)
                 return value
 
-        self.bounds_table.add(game.moves, alpha + 18 + 1)
-        self.values_table.add(game.moves, alpha)
+        self.bounds_table.add(game.red_bitboard, game.yellow_bitboard, alpha + 18 + 1)
+        self.values_table.add(game.red_bitboard, game.yellow_bitboard, alpha)
         self.total_non_terminal_time += time.time() - start_time
         return alpha
     
@@ -118,10 +118,10 @@ class Connect4Minimax:
         best_value = -np.inf
         for d in range(depth):
             # Get column order
-            evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
+            evals = [self.values_table.get(*game.get_bitboards_from_drop(col)) if not game.is_column_full(col) else -10000 for col in range(Connect4.cols)]
             order = np.flip(np.argsort(evals))
             for col in order:
-                if game.is_column_full(col) or evals[col] < -500:
+                if game.is_column_full(col):
                     continue
                 row, col = game.drop_piece(col)
                 # value = -self.minimax(game, (row, col), d, 0, 1)
@@ -134,5 +134,5 @@ class Connect4Minimax:
                     best_cols = [col]
                 elif value == best_value:
                     best_cols.append(col)
-            self.values_table.add(game.moves, best_value)
+            self.values_table.add(game.red_bitboard, game.yellow_bitboard, best_value)
         return np.random.choice(best_cols)
