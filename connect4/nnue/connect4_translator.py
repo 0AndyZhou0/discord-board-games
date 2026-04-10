@@ -34,5 +34,6 @@ class Connect4Translator:
         game.player = player
         game.moves = moves
         game.evaluate_board_reset()
-        best_col = self.minimax.get_best_col(game, 4 + (len(moves) // 8))
+        depth = min(4 + (len(moves) // 8), 42 - len(moves))
+        best_col = self.minimax.get_best_col(game, depth)
         return best_col
