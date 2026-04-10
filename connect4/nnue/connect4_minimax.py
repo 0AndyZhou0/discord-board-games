@@ -116,7 +116,7 @@ class Connect4Minimax:
     def get_best_col(self, game: Connect4Game, depth: int) -> int:
         best_cols = []
         best_value = -np.inf
-        for d in range(1, depth + 1):
+        for d in range(depth):
             # Get column order
             evals = [self.values_table.get(game.moves + str(col)) for col in range(Connect4.cols)]
             order = np.flip(np.argsort(evals))
@@ -124,8 +124,8 @@ class Connect4Minimax:
                 if game.is_column_full(col) or evals[col] < -500:
                     continue
                 row, col = game.drop_piece(col)
-                # value = -self.minimax(game, (row, col), d-1, 0, 1)
-                value = -self.minimax(game, (row, col), d-1, -18, 18)
+                # value = -self.minimax(game, (row, col), d, 0, 1)
+                value = -self.minimax(game, (row, col), d, -18, 18)
                 game.remove_piece(row, col)
                 if value > 500: # Instantly play winning move
                     return col
