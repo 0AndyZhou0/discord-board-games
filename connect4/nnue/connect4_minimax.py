@@ -114,6 +114,16 @@ class Connect4Minimax:
     #     return col
     
     def get_best_col(self, game: Connect4Game, depth: int) -> int:
+        # Fix for when only one move is valid (Maybe fix in the future)
+        valid = []
+        for col in range(Connect4.cols):
+            if game.is_column_full(col):
+                continue
+            if not valid:
+                valid.append(col)
+        if len(valid) == 1:
+            return valid[0]
+
         best_cols = []
         best_value = -np.inf
         for d in range(depth):
